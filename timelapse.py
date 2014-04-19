@@ -4,26 +4,34 @@ import os, sys
 import subprocess
 import cameraset
 
-WIDTH = 860 # 2592 max
-HEIGHT = 720 # 1944 max
+WIDTH = 2592 # max
+HEIGHT = 1944 # max
 DIRNAME = "TL_%s" % datetime.now().strftime("%Y%m%d-%H%M%S")
 ZFILL = 7
+ENCODEFPS = 25
 
 def makeVideo(FPS):
     os.chdir(DIRNAME)
-    print FPS
-    subprocess.call(["ffmpeg", "-r", "%f" % FPS, "-i", "%%0%dd.jpg" % ZFILL,
-                     "-vcodec", "libx264", "-q", "0", "-vf",
-                     "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
-                     "%s-%dfps.mp4" % (DIRNAME, FPS)])
+    try:
+        subprocess.call(["ffmpeg", "-r", "%f" % ENCODEFPS, "-i", "%%0%dd.jpg" % ZFILL,
+                         "-vcodec", "libx264", "-sameq", "-vf",
+                         "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
+                         "%s-%dfps.mp4" % (DIRNAME, FPS)]) # for RPi
+    except:
+        subprocess.call(["ffmpeg", "-r", "%f" % ENCODEFPS, "-i", "%%0%dd.jpg" % ZFILL,
+                         "-vcodec", "libx264", "-q", "0", "-vf",
+                         "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
+                         "%s-%dfps.mp4" % (DIRNAME, FPS)]) # for another platform
+
 def mainLoop(camera, FPS, LENGTH):
     while True:
-        print camera.num
+        print camera.num,
         camera.takeImage()
         cv2.waitKey(int(1000/FPS))
-        if camera.num == LENGTH+1:
+        if camera.num > LENGTH:
             camera.terminate()
-            makeVideo(FPS)
+            if raw_input("Make video? [y/n]").lower() == "y":
+                makeVideo(FPS)
             break
 
 def main(FPS, LENGTH):
@@ -34,6 +42,9 @@ def main(FPS, LENGTH):
 
     if DIRNAME not in os.listdir("./"):
         os.mkdir("./%s" % DIRNAME)
+    duration = LENGTH/FPS
+
+    print("This will finish in %d second" % duration)
     mainLoop(camera, FPS, LENGTH)
 
 if __name__ == "__main__":
@@ -46,4 +57,4 @@ if __name__ == "__main__":
               "\ne.g: python timelapse.py 0.5 10")
         sys.exit(-1)
 
-    main(FPS, int(TIME/FPS))
+    main(FPS, int(TIME*ENCODEFPS))
