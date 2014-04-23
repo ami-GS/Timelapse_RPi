@@ -4,6 +4,7 @@ import os, sys
 import subprocess
 import cameraset
 import platform
+import math
 
 WIDTH = 2592 # max
 HEIGHT = 1944 # max
@@ -24,9 +25,16 @@ def makeVideo(FPS):
                          "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
                          "%s-%dfps.mp4" % (DIRNAME, FPS)]) # for RPi
 
+def processing(NUM, LENGTH):
+    out = "["
+    sharpNum = int(math.floor(float(NUM)/LENGTH) * 60)
+    out += "#"*sharpNum + "]"
+    sys.stdout.write("\r%s" % out)
+    sys.stdout.flush()
+
 def mainLoop(camera, FPS, LENGTH):
     while True:
-        print camera.num,
+        processing(camera.num, LENGTH) # this doesn't work well
         camera.takeImage()
         cv2.waitKey(int(1000/FPS))
         if camera.num > LENGTH:
