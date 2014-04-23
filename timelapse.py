@@ -3,6 +3,7 @@ from datetime import datetime
 import os, sys
 import subprocess
 import cameraset
+import platform
 
 WIDTH = 2592 # max
 HEIGHT = 1944 # max
@@ -12,16 +13,16 @@ ENCODEFPS = 25
 
 def makeVideo(FPS):
     os.chdir(DIRNAME)
-    try:
-        subprocess.call(["ffmpeg", "-r", "%f" % ENCODEFPS, "-i", "%%0%dd.jpg" % ZFILL,
-                         "-vcodec", "libx264", "-sameq", "-vf",
-                         "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
-                         "%s-%dfps.mp4" % (DIRNAME, FPS)]) # for RPi
-    except:
+    if platform.system() == "Darwin":
         subprocess.call(["ffmpeg", "-r", "%f" % ENCODEFPS, "-i", "%%0%dd.jpg" % ZFILL,
                          "-vcodec", "libx264", "-q", "0", "-vf",
                          "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
                          "%s-%dfps.mp4" % (DIRNAME, FPS)]) # for another platform
+    else:
+        subprocess.call(["ffmpeg", "-r", "%f" % ENCODEFPS, "-i", "%%0%dd.jpg" % ZFILL,
+                         "-vcodec", "libx264", "-sameq", "-vf",
+                         "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
+                         "%s-%dfps.mp4" % (DIRNAME, FPS)]) # for RPi
 
 def mainLoop(camera, FPS, LENGTH):
     while True:
