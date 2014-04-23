@@ -24,6 +24,8 @@ class usbCamera(Camera):
     def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360):
         super(usbCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
         self.camera = cv2.VideoCapture(0)
+        self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, WIDTH)
+        self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, HEIGHT)
 
     def takeImage(self):
         _, img = self.camera.read()
