@@ -3,7 +3,7 @@ Timelapse_RPi
 
 Time lapse camera for Raspberry Pi
 
-(Another PC is also available)
+(Another OS is also available)
 
 
 # Usage
@@ -11,9 +11,9 @@ Time lapse camera for Raspberry Pi
 python timelapse.py [FPS] [Video length]
 `
 
-0 < FPS <= 10
+FPS should be set 0 < FPS <= 10
 
-Video length is second
+Video length is 'second'
 
 
 # warning
