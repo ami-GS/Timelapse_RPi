@@ -1,10 +1,9 @@
-import cv2
 from datetime import datetime
 import os, sys
-import subprocess
+import time
 import cameraset
-import platform
 import math
+import makevideo
 
 WIDTH = 2592 # max
 HEIGHT = 1944 # max
@@ -12,20 +11,7 @@ DIRNAME = "TL_%s" % datetime.now().strftime("%Y%m%d-%H%M%S")
 ZFILL = 7
 ENCODEFPS = 25
 
-def makeVideo(FPS):
-    os.chdir(DIRNAME)
-    if platform.system() == "Darwin":
-        subprocess.call(["ffmpeg", "-r", "%f" % ENCODEFPS, "-i", "%%0%dd.jpg" % ZFILL,
-                         "-vcodec", "libx264", "-q", "0", "-vf",
-                         "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
-                         "%s-%dfps.mp4" % (DIRNAME, FPS)]) # for another platform
-    else:
-        subprocess.call(["ffmpeg", "-r", "%f" % ENCODEFPS, "-i", "%%0%dd.jpg" % ZFILL,
-                         "-vcodec", "libx264", "-sameq", "-vf",
-                         "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
-                         "%s-%dfps.mp4" % (DIRNAME, FPS)]) # for RPi
-
-def processing(NUM, LENGTH):
+def progress(NUM, LENGTH):
     out = "["
     sharpNum = int(math.floor(float(NUM)/LENGTH) * 60)
     out += "#"*sharpNum + "]"
@@ -33,14 +19,15 @@ def processing(NUM, LENGTH):
     sys.stdout.flush()
 
 def mainLoop(camera, FPS, LENGTH):
+    writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, FPS, ZFILL)
     while True:
-        processing(camera.num, LENGTH) # this doesn't work well
+        progress(camera.num, LENGTH) # this doesn't work well
         camera.takeImage()
-        cv2.waitKey(int(1000/FPS))
+        time.sleep(1.0/FPS)
         if camera.num > LENGTH:
             camera.terminate()
             if raw_input("Make video? [y/n]").lower() == "y":
-                makeVideo(FPS)
+                writer.ffmpeg()
             break
 
 def main(FPS, LENGTH):
