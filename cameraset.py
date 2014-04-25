@@ -8,17 +8,21 @@ class Camera(object):
         self.ZFILL = ZFILL
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
+        self.camera = ""
 
     def takeImage(self):
-        pass
-
-    def terminate(self):
         pass
 
     def timeStamp(self):
         stamp = str(self.num).zfill(self.ZFILL)
         self.num += 1
         return stamp
+
+    def terminate(self):
+        del self.camera
+
+    def getFrame(self):
+        pass
 
 class usbCamera(Camera):
     def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360):
@@ -32,8 +36,12 @@ class usbCamera(Camera):
         if _:
             cv2.imwrite("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()), img)
 
-    def terminate(self):
-        del self.camera
+    def getFrame(self):
+        _, img = self.camera.read()
+        if _:
+            return img
+        else:
+            return -1
 
 class piCamera(Camera):
     def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360):
