@@ -26,6 +26,7 @@ class makeVideo():
                              "%s-%dfps.mp4" % (self.DIRNAME, self.FPS)]) # for RPi
 
     def initWriter(self, size):
+        os.chdir(self.DIRNAME)
         self.writer = cv2.VideoWriter()
         success = self.writer.open("%s-%dfps.mp4" % (self.DIRNAME, self.FPS),
                                    FOURCC, self.ENCODEFPS, size, True)
