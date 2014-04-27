@@ -1,5 +1,7 @@
 import time
 import cv2
+import numpy as np
+import threading
 
 class Camera(object):
     def __init__(self, DIRNAME, ZFILL, WIDTH, HEIGHT):
@@ -9,6 +11,7 @@ class Camera(object):
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
         self.camera = ""
+        self.t = ""
 
     def takeImage(self):
         pass
@@ -24,6 +27,10 @@ class Camera(object):
     def getFrame(self):
         pass
 
+    def setThread(self, target, args):
+        self.t = threading.Thread(target=target, args=args)
+        self.t.setDaemon(True)
+
 class usbCamera(Camera):
     def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360):
         super(usbCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
@@ -36,19 +43,30 @@ class usbCamera(Camera):
         if _:
             cv2.imwrite("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()), img)
 
-    def getFrame(self):
+    def _getFrame(self):
         _, img = self.camera.read()
         if _:
             return img
         else:
             return -1
 
+    def getFrame(self):
+        img = self._getFrame()
+        return np.array(cv2.imencode(".jpg", img)[1]).tostring()
+
+    def getVideoFrame(self):
+        img = self._getFrame()
+        return img
+
 class piCamera(Camera):
     def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360):
         super(piCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
-        import picamera
+        import picamera, io
         self.camera = picamera.PiCamera()
         self.camera.resolution = (self.WIDTH, self.HEIGHT)
+        self.camera.framerate = 30
+        #self.camera.led = False
+        self.camera.stream = io.BytesIO()
         time.sleep(2)
 
     def takeImage(self):

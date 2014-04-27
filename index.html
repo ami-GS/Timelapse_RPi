@@ -1,0 +1,32 @@
+<html>
+<head>
+</head>
+<title>livecamera</title>
+<body>
+<img id="liveImg" src="" width="480" height="360">
+<input type="button" value="start timeLapse" onclick="startTimeLapse()" />
+<img id="frame">
+<script type="text/javascript">
+var img = document.getElementById("liveImg");
+var arrayBuffer;
+
+var ws = new WebSocket("ws://localhost:8080/camera");
+ws.binaryType = 'blob';
+ws.onopen = function(){
+	console.log("connection was established");
+};
+
+ws.onmessage = function(evt){
+img.src = URL.createObjectURL(evt.data);
+};
+
+window.onbeforeunload = function(){
+    ws.close(1000); //Is this needed??
+};
+
+function startTimeLapse() {
+    ws.send("start")
+}
+</script>
+</body>
+</html>
