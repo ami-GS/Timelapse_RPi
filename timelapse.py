@@ -7,23 +7,24 @@ import makevideo
 import tornado.web, tornado.websocket, tornado.httpserver
 import tornado.ioloop
 from tornado.ioloop import IOLoop, PeriodicCallback
+import json
 
 WIDTH = 480 #2592 # max
 HEIGHT = 360 #1944 # max
 DIRNAME = "TL_%s" % datetime.now().strftime("%Y%m%d-%H%M%S")
 ZFILL = 7
 ENCODEFPS = 25
-
+FPS = 0
+LENGTH = 0
 CLIENT = ""
+
 class HttpHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("./index.html")
 
 class WSHandler(tornado.websocket.WebSocketHandler):
-    def initialize(self, camera, FPS, LENGTH):
+    def initialize(self, camera):
         self.camera = camera
-        self.FPS = FPS
-        self.LENGTH = LENGTH
 
     def open(self):
         global CLIENT
@@ -33,22 +34,35 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         CLIENT = self
         self.camera.t.start()
         self.callback = ""
-        sys.stdout.write("%s : connection opened" % self.request.remote_ip)
+        sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
     def on_message(self, message):
-        if message == "start":
-            self.callback = PeriodicCallback(self.videoWriter, 1000/self.FPS)
-            self.writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, self.FPS, ZFILL)
+        def run():
+            self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
+            self.writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, FPS, ZFILL)
             self.writer.initWriter((WIDTH, HEIGHT))
             self.callback.start()
+
+        global FPS, LENGTH
+        message = json.loads(message)
+        if message[0] == "fps":
+            FPS = float(message[1])
+        elif message[0] == "length":
+            LENGTH = int(message[1])*ENCODEFPS
+
+        if FPS and LENGTH:
+            main(FPS, int(LENGTH))
+            run()
 
     def videoWriter(self):
         img = self.camera.getVideoFrame()
         self.camera.num += 1
         self.writer.write(img)
-        if self.camera.num > self.LENGTH:
+        if self.camera.num > LENGTH:
+            sys.stdout.write("finish recording\n")
             self.callback.stop()
             self.camera.terminate()
+            sys.exit(1)
 
     @staticmethod
     def rloop(camera):
@@ -97,35 +111,23 @@ def mainLoop(camera, FPS, LENGTH):
             break
 
 def main(FPS, LENGTH):
+    if DIRNAME not in os.listdir("./"):
+        os.mkdir("./%s" % DIRNAME)
+    duration = LENGTH/FPS
+
+    print("This will finish in %d second" % duration)
+
+if __name__ == "__main__":
     try:
         camera = cameraset.piCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
     except:
         camera = cameraset.usbCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
         camera.setThread(target=WSHandler.loop, args=(camera,))
 
-    if DIRNAME not in os.listdir("./"):
-        os.mkdir("./%s" % DIRNAME)
-    duration = LENGTH/FPS
-
-    print("This will finish in %d second" % duration)
     app = tornado.web.Application([
                 (r"/", HttpHandler),
-                (r"/camera", WSHandler, dict(camera=camera,FPS=FPS,LENGTH=LENGTH)),
+                (r"/camera", WSHandler, dict(camera=camera)),
                 ])
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(8080)
     IOLoop.instance().start()
-
-    #mainLoop(camera, FPS, LENGTH)
-
-if __name__ == "__main__":
-    args = sys.argv
-    try:
-        FPS = float(args[1])
-        TIME = float(args[2])
-    except:
-        print("Usage: python timelapse.py [FPS] [Video length]"
-              "\ne.g: python timelapse.py 0.5 10")
-        sys.exit(-1)
-
-    main(FPS, int(TIME*ENCODEFPS))
