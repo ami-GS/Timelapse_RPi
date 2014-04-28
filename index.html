@@ -3,9 +3,11 @@
 </head>
 <title>livecamera</title>
 <body>
-<img id="liveImg" src="" width="480" height="360">
-<input type="button" value="start timeLapse" onclick="startTimeLapse()" />
-<img id="frame">
+<img id="liveImg" src="" width="480" height="360"><br>
+Frames per second : <input type="text" id="fps" value="" /><br>
+Video length : <input type="text" id="len" value="" /><br>
+<input type="button" value="start recording" onclick="startTimeLapse()" /><br>
+<p id="duration">
 <script type="text/javascript">
 var img = document.getElementById("liveImg");
 var arrayBuffer;
@@ -25,7 +27,20 @@ window.onbeforeunload = function(){
 };
 
 function startTimeLapse() {
-    ws.send("start")
+    fps = document.getElementById("fps").value;
+    length = document.getElementById("len").value;
+    ws.send('["fps", %s]'.replace("%s", fps));
+    ws.send('["length", %s]'.replace("%s", length));
+    fps = parseFloat(fps);
+    length = parseFloat(length);
+    writeInfo(fps, length*25);
+}
+
+function writeInfo(FPS, LENGTH){
+//    document.write(LENGTH/FPS)
+    var duration = document.getElementById("duration");
+    var textnode = document.createTextNode(String(LENGTH/FPS)+" seconds");
+    duration.appendChild(textnode);
 }
 </script>
 </body>
