@@ -71,3 +71,9 @@ class piCamera(Camera):
 
     def takeImage(self):
         self.camera.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
+
+    def getVideoFrame(self):
+        data = np.fromstring(self.stream.getvalue(), dtype=np.uint8)
+        img = cv2.imdecode(data, 1)
+        img = img[:, :, ::-1]
+        return img

@@ -17,6 +17,7 @@ ENCODEFPS = 25
 FPS = 0
 LENGTH = 0
 CLIENT = ""
+RUN = False
 
 class HttpHandler(tornado.web.RequestHandler):
     def get(self):
@@ -38,21 +39,25 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         def run():
+            global RUN
             self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
             self.writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, FPS, ZFILL)
             self.writer.initWriter((WIDTH, HEIGHT))
             self.callback.start()
+            RUN  = True
 
         global FPS, LENGTH
-        message = json.loads(message)
-        if message[0] == "fps":
-            FPS = float(message[1])
-        elif message[0] == "length":
-            LENGTH = int(message[1])*ENCODEFPS
+        if not RUN:
+            message = json.loads(message)
+            if message[0] == "fps":
+                FPS = float(message[1])
+            elif message[0] == "length":
+                LENGTH = float(message[1])
+                DURATION = LENGTH*ENCODEFPS
 
-        if FPS and LENGTH:
-            main(FPS, int(LENGTH))
-            run()
+            if FPS and LENGTH:
+                main(FPS, int(DURATION))
+                run()
 
     def videoWriter(self):
         img = self.camera.getVideoFrame()
@@ -66,14 +71,17 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     @staticmethod
     def rloop(camera):
-        for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
-            camera.stream.seek(0)
-            img = camera.stream.read()
-            CLIENT.write_message(img, binary=True)
-            camera.stream.seek(0)
-            camera.stream.truncate()
-            if not CLIENT:
-                break
+        try:
+            for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
+                camera.stream.seek(0)
+                img = camera.stream.read()
+                CLIENT.write_message(img, binary=True)
+                camera.stream.seek(0)
+                camera.stream.truncate()
+                if not CLIENT:
+                    break
+        except Exception as e:
+            print e
 
     @staticmethod
     def loop(camera):
@@ -120,6 +128,7 @@ def main(FPS, LENGTH):
 if __name__ == "__main__":
     try:
         camera = cameraset.piCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
+        camera.setThread(target=WSHandler.rloop, args=(camera,))
     except:
         camera = cameraset.usbCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
         camera.setThread(target=WSHandler.loop, args=(camera,))
