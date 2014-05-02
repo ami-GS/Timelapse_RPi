@@ -4,14 +4,16 @@
 <title>livecamera</title>
 <body>
 <img id="liveImg" src="" width="480" height="360"><br>
-Frames per second : <input type="text" id="fps" value="" /><br>
-Video length : <input type="text" id="len" value="" /><br>
-<input type="button" value="start recording" onclick="startTimeLapse()" /><br>
-<p id="duration">
+Frames per second : <input type="number" id="fps2" value="1.0" step="0.1" min="0" max="8" onmousedown="updateInfo();"><br>
+Video length : <input type="number" id="len2" value="2.0" step="0.5" max="50" min="0.5" onmousedown="updateInfo();" /> seconds <br>
+<input type="button" value="start recording" onclick="startTimeLapse()"/><br>
+<div id="duration"></div>
 <script type="text/javascript">
-var img = document.getElementById("liveImg");
-var arrayBuffer;
+window.onload = function(){
+    updateInfo();
+};
 
+var img = document.getElementById("liveImg");
 var ws = new WebSocket("ws://localhost:8080/camera");
 ws.binaryType = 'blob';
 ws.onopen = function(){
@@ -27,20 +29,18 @@ window.onbeforeunload = function(){
 };
 
 function startTimeLapse() {
-    fps = document.getElementById("fps").value;
-    length = document.getElementById("len").value;
+    var fps = document.getElementById("fps").value;
+    var length = document.getElementById("len").value;
     ws.send('["fps", %s]'.replace("%s", fps));
     ws.send('["length", %s]'.replace("%s", length));
-    fps = parseFloat(fps);
-    length = parseFloat(length);
-    writeInfo(fps, length*25);
 }
 
-function writeInfo(FPS, LENGTH){
-//    document.write(LENGTH/FPS)
+function updateInfo(){
     var duration = document.getElementById("duration");
-    var textnode = document.createTextNode(String(LENGTH/FPS)+" seconds");
-    duration.appendChild(textnode);
+    var fps = parseFloat(document.getElementById("fps2").value);
+    var length = parseFloat(document.getElementById("len2").value);
+    tmp = "Recording lasts " + String((length*25)/fps)+" seconds.";
+    duration.innerHTML = tmp;
 }
 </script>
 </body>
