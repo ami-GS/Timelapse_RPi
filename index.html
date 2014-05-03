@@ -4,16 +4,18 @@
 <title>livecamera</title>
 <body>
 <img id="liveImg" src="" width="480" height="360"><br>
-Frames per second : <input type="number" id="fps2" value="1.0" step="0.1" min="0" max="8" onmousedown="updateInfo();"><br>
-Video length : <input type="number" id="len2" value="2.0" step="0.5" max="50" min="0.5" onmousedown="updateInfo();" /> seconds <br>
-<input type="button" value="start recording" onclick="startTimeLapse()"/><br>
+Frames per second : <input type="number" id="fps" value="1.0" step="0.1" min="0" max="8" onmousedown="setInfo();"><br>
+Video length : <input type="number" id="len" value="2.0" step="0.5" max="50" min="0.5" onmousedown="setInfo();" /> seconds <br>
+<input type="button" id="start" value="start recording" onclick="startTimeLapse()"/><br>
 <div id="duration"></div>
 <script type="text/javascript">
 window.onload = function(){
-    updateInfo();
+    setInfo();
 };
 
 var img = document.getElementById("liveImg");
+var duration = document.getElementById("duration");
+var count;
 var ws = new WebSocket("ws://localhost:8080/camera");
 ws.binaryType = 'blob';
 ws.onopen = function(){
@@ -29,17 +31,44 @@ window.onbeforeunload = function(){
 };
 
 function startTimeLapse() {
+    cntStart();
+    document.getElementById("start").disabled = true;
     var fps = document.getElementById("fps").value;
     var length = document.getElementById("len").value;
     ws.send('["fps", %s]'.replace("%s", fps));
     ws.send('["length", %s]'.replace("%s", length));
 }
 
-function updateInfo(){
-    var duration = document.getElementById("duration");
-    var fps = parseFloat(document.getElementById("fps2").value);
-    var length = parseFloat(document.getElementById("len2").value);
-    tmp = "Recording lasts " + String((length*25)/fps)+" seconds.";
+var timer;
+function cntStart(){
+    timer = setInterval("cntDown()",1000);
+}
+
+function cntDown(){
+    count -= 1;
+    if(count <= 0){
+        cntEnd();
+    }
+    else{
+        updateInfo(count)
+    }
+}
+
+function cntEnd(){
+    duration.innerHTML = "Finish recording";
+    clearInterval(timer);
+}
+
+function setInfo(){
+    var fps = parseFloat(document.getElementById("fps").value);
+    var length = parseFloat(document.getElementById("len").value);
+    count = (length*25)/fps;
+    updateInfo(count);
+}
+
+function updateInfo(time){
+    time = time*10;
+    tmp = "Recording lasts " + String(Math.round(time)/10)+" seconds.";
     duration.innerHTML = tmp;
 }
 </script>
