@@ -16,8 +16,9 @@ ZFILL = 7
 ENCODEFPS = 25
 FPS = 0
 LENGTH = 0
-CLIENT = ""
+CLIENT = [] #[ip address, websocket connection object]
 RUN = False
+
 
 class HttpHandler(tornado.web.RequestHandler):
     def get(self):
@@ -28,42 +29,49 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.camera = camera
 
     def open(self):
-        global CLIENT
-        if CLIENT:
-            sys.stdout.write("%s : connection refused" % self.request.remote_ip)
-            self.on_close();return
-        CLIENT = self
+        global CLIENT, RUN
+        if len(CLIENT) == 2:
+            if CLIENT[0] == self.request.remote_ip:
+                CLIENT[1] = self
+            else:
+                sys.stdout.write("%s : connection refused" % self.request.remote_ip)
+                self.on_close(); return
+        else:
+            CLIENT.append(self.request.remote_ip)
+            CLIENT.append(self)
+        RUN = True
         self.camera.t.start()
         self.callback = ""
         sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
     def on_message(self, message):
         def run():
-            global RUN
             self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
             self.writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, FPS, ZFILL)
             self.writer.initWriter((WIDTH, HEIGHT))
             self.callback.start()
-            RUN  = True
+            sys.stdout.write("Start recording")
 
         global FPS, LENGTH
-        if not RUN:
-            message = json.loads(message)
-            if message[0] == "fps":
-                FPS = float(message[1])
-            elif message[0] == "length":
-                LENGTH = float(message[1])
-                DURATION = LENGTH*ENCODEFPS
+        #if not RUN:
+        message = json.loads(message)
+        if message[0] == "fps":
+            FPS = float(message[1])
+        elif message[0] == "length":
+            LENGTH = float(message[1])
+            LENGTH = LENGTH*ENCODEFPS
 
-            if FPS and LENGTH:
-                main(FPS, int(DURATION))
-                run()
+        if FPS and LENGTH:
+            main(FPS, int(LENGTH))
+            run()
 
     def videoWriter(self):
         img = self.camera.getVideoFrame()
         self.camera.num += 1
         self.writer.write(img)
         if self.camera.num > LENGTH:
+            global RUN
+            RUN = False
             sys.stdout.write("finish recording\n")
             self.callback.stop()
             self.camera.terminate()
@@ -75,10 +83,10 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
                 camera.stream.seek(0)
                 img = camera.stream.read()
-                CLIENT.write_message(img, binary=True)
+                CLIENT[1].write_message(img, binary=True)
                 camera.stream.seek(0)
                 camera.stream.truncate()
-                if not CLIENT:
+                if not RUN:
                     break
         except Exception as e:
             print e
@@ -86,17 +94,18 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     @staticmethod
     def loop(camera):
         try:
-            while CLIENT:
+            while RUN:
                 img = camera.getFrame()
-                CLIENT.write_message(img, binary=True)
+                CLIENT[1].write_message(img, binary=True)
                 time.sleep(1.0/25)
         except Exception as e:
             print e
 
     def on_close(self):
-        global CLIENT
-        if CLIENT:
-            CLIENT = ""
+        global RUN
+        if RUN:
+            RUN = False
+
         print("%s : connection closed" % self.request.remote_ip)
 
 def progress(NUM, LENGTH):

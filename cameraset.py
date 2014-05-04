@@ -64,7 +64,7 @@ class piCamera(Camera):
         import picamera, io
         self.camera = picamera.PiCamera()
         self.camera.resolution = (self.WIDTH, self.HEIGHT)
-        self.camera.framerate = 30
+        self.camera.framerate = 25
         #self.camera.led = False
         self.camera.stream = io.BytesIO()
         time.sleep(2)
