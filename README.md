@@ -6,15 +6,14 @@ Time lapse camera for Raspberry Pi
 (Another OS is also available)
 
 
-# Usage
+## Usage
 `
-python timelapse.py [FPS] [Video length]
+python timelapse.py
 `
-
-FPS should be set 0 < FPS <= 10
-
-Video length is 'second'
+access to Raspberry Pi using browser (http://raspberrypi.local:8080)
+set the fps and video length, finally it returns time until the recordng will have finished.
 
 
 # warning
-Because ffmpeg encoding speed in Raspberry Pi is seriously slow, you had better to use ffmpeg in another workstation.
+You cannot record when you use Raspberry pi camera module (there are bugs yet sorry)
+However, USB camera is available.

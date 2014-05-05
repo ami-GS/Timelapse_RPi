@@ -2,6 +2,8 @@ import time
 import cv2
 import numpy as np
 import threading
+from picamera import PiCamera
+import io
 
 class Camera(object):
     def __init__(self, DIRNAME, ZFILL, WIDTH, HEIGHT):
@@ -58,22 +60,23 @@ class usbCamera(Camera):
         img = self._getFrame()
         return img
 
-class piCamera(Camera):
+class piCamera(Camera, PiCamera):
     def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360):
         super(piCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
-        import picamera, io
-        self.camera = picamera.PiCamera()
-        self.camera.resolution = (self.WIDTH, self.HEIGHT)
-        self.camera.framerate = 25
+        super(Camera, self).__init__()
+        self.resolution = (self.WIDTH, self.HEIGHT)
+        self.framerate = 25
         #self.camera.led = False
-        self.camera.stream = io.BytesIO()
+        self.stream = io.BytesIO()
+        self.stream2 = io.BytesIO()
         time.sleep(2)
 
     def takeImage(self):
-        self.camera.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
+        self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
 
     def getVideoFrame(self):
-        data = np.fromstring(self.stream.getvalue(), dtype=np.uint8)
+        self.capture(self.stream2, format="jpeg") #this have error
+        data = np.fromstring(self.stream2.getvalue(), dtype=np.uint8)
         img = cv2.imdecode(data, 1)
         img = img[:, :, ::-1]
         return img
