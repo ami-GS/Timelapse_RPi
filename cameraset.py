@@ -61,15 +61,15 @@ class usbCamera(Camera):
         return img
 
 class piCamera(Camera, PiCamera):
-    def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360):
+    def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360, FPS=25, LED=False):
         super(piCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
         super(Camera, self).__init__()
         self.resolution = (self.WIDTH, self.HEIGHT)
-        self.framerate = 25
-        #self.camera.led = False
+        self.framerate = FPS
+        self.camera.led = LED
         self.stream = io.BytesIO()
         self.stream2 = io.BytesIO()
-        time.sleep(2)
+        time.sleep(2) #initialize
 
     def takeImage(self):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
