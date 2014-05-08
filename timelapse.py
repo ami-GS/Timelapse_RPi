@@ -36,7 +36,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             if CLIENT[1] == self.request.remote_ip:
                 CLIENT[0] = self
                 self.write_message("recording")
-                self.write_message("remaining:") # TODO send remaining time
+                self.write_message("remaining:%f" % (float(LENGTH-self.camera.num)/FPS)) # TODO send remaining time
             else:
                 sys.stdout.write("%s : connection refused" % self.request.remote_ip)
                 self.on_close(); return
@@ -52,9 +52,13 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         def run():
             CLIENT.append(self.request.remote_ip)
-            self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
-            self.writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, FPS, ZFILL)
-            self.writer.initWriter((WIDTH, HEIGHT))
+            if isinstance(self.camera, cameraset.usbCamera):
+                self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
+                self.writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, FPS, ZFILL)
+                self.writer.initWriter((WIDTH, HEIGHT))
+            elif isinstance(self.camera, cameraset.piCamera):
+                self.LENGTH = LENGTH
+                self.callback = PeriodicCallback(self.takeConsecutiveImages, 1000/FPS)
             self.callback.start()
             sys.stdout.write("Start recording")
 
@@ -68,6 +72,11 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             elif message[0] == "length":
                 LENGTH = float(message[1])
                 LENGTH = LENGTH*ENCODEFPS
+            elif message[0] == "param1":
+                self.camera.pro.setParam(param1=int(message[1]))
+            elif message[0] == "param2":
+                self.camera.pro.setParam(param2=int(message[1]))
+
         elif len(message) == 1:
             global VIDEOMODE
             VIDEOMODE = message[0]
@@ -79,6 +88,16 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
             print("This will finish in %d second" % int(int(LENGTH)/int(FPS)))
             run()
+
+    def takeConsecutiveImages(self):
+        self.camera.takeImage()
+        self.camera.num += 1
+        if self.camera.num > LENGTH:
+            self.callback.stop()
+            sys.stdout.write("finish recording\n")
+            sys.stdout.write("make video? (this is not recommended) [Y/n]")
+            if raw_input() == "Y":
+                self.writer.ffmpeg()
 
     def videoWriter(self):
         img = self.camera.getVideoFrame()
@@ -103,6 +122,13 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
                 camera.stream.seek(0)
                 img = camera.stream.read()
+                #img = np.fromstring(img, dtype=np.uint8).tostring()
+                #img = cv2.imdecode(img,1)#.tostring()
+                #img = img[:,:,::-1]
+                #img = pro.assign(img,VIDEOMODE)
+                #error here
+                #result, img = cv2.imencode(".jpg", img, [1,90])
+                #img = np.array(img).tostring()
                 CLIENT[0].write_message(img, binary=True)
                 camera.stream.seek(0)
                 camera.stream.truncate()
