@@ -73,7 +73,7 @@ class piCamera(Camera, PiCamera):
         super(Camera, self).__init__()
         self.resolution = (self.WIDTH, self.HEIGHT)
         self.framelate = FPS
-        self.camera.led = LED
+        self.led = LED
         self.stream = io.BytesIO()
         self.stream2 = io.BytesIO()
         time.sleep(2) #initialize
