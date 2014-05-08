@@ -15,12 +15,14 @@ class makeVideo():
     def ffmpeg(self):
         os.chdir(self.DIRNAME)
         if platform.system() == "Darwin":
-            subprocess.call(["ffmpeg", "-r", "%f" % self.ENCODEFPS, "-i", "%%0%dd.jpg" % self.ZFILL,
+            subprocess.call(["ffmpeg", "-r", "%f" % self.ENCODEFPS,
+                             "-i", "%%0%dd.jpg" % self.ZFILL,
                              "-vcodec", "libx264", "-q", "0", "-vf",
                              "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
                              "%s-%dfps.mp4" % (self.DIRNAME, self.FPS)]) # for another platform
         else:
-            subprocess.call(["ffmpeg", "-r", "%f" % self.ENCODEFPS, "-i", "%%0%dd.jpg" % self.ZFILL,
+            subprocess.call(["ffmpeg", "-r", "%f" % self.ENCODEFPS,
+                             "-i", "%%0%dd.jpg" % self.ZFILL,
                              "-vcodec", "libx264", "-sameq", "-vf",
                              "scale=1620:1080,pad=1920:1080:150:0,setdar=16:9",
                              "%s-%dfps.mp4" % (self.DIRNAME, self.FPS)]) # for RPi
