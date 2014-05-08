@@ -5,6 +5,10 @@
 <body>
 <img id="liveImg" src="" width="480" height="360">
 <canvas id="canvas"></canvas><br>
+param1 <input type="range" min="0" max="255" value="100" onmousemove="chParam1(value)">
+<div id="param1">100</div><br>
+param2 <input type="range" min="0" max="255" value="200" onmousemove="chParam2(value)">
+<div id="param2">200</div><br>
 <form name="mode">
 <input type="button" id="normal" value="normal Mode" onclick="normalMode(), disable(this)" disabled="disabled">
 <input type="button" id="edge" value="edge Mode" onclick="edgeMode(), disable(this)">
@@ -16,6 +20,7 @@ Video length : <input type="number" id="len" value="2.0" step="0.5" max="50" min
 <input type="button" id="start" value="start recording" onclick="startTimeLapse()"/><br>
 <div id="duration"></div>
 <script type="text/javascript">
+
 var img = document.getElementById("liveImg");
 var duration = document.getElementById("duration");
 var count;
@@ -39,17 +44,17 @@ ws.onmessage = function(evt){
             console.log("now recording");
             STATE = "recording";
             drawRec();
-            setInfo(STATE)
         }
         else if(evt.data.indexOf("remaining") != -1){
-            console.log("remaining"); //TODO receive remaining time
+            count = Number(evt.data.slice(10,evt.data.indexOf(".")+1)); //TODO receive remaining time
+            setInfo(STATE)
         }
     }
-    //ccc.drawImage(img.src,0,0);
 };
 
 window.onbeforeunload = function(){
     ws.close(1000); //Is this needed??
+    clearInterval(timer);
 };
 
 function drawRec(){
@@ -96,7 +101,7 @@ function cntEnd(){
 function setInfo(STATE){
     if(STATE == "recording"){
         document.getElementById("start").disabled = true;
-        duration.innerHTML = "Finish in several second";
+        cntStart()
     }
     else{
         var fps = parseFloat(document.getElementById("fps").value);
@@ -110,6 +115,17 @@ function updateInfo(time){
     time = time*10;
     tmp = "Recording lasts " + String(Math.round(time)/10)+" seconds.";
     duration.innerHTML = tmp;
+}
+
+function chParam1(value){
+    ws.send('["param1", %s]'.replace("%s", value));
+    var param1 = document.getElementById("param1");
+    param1.innerHTML = value;
+}
+function chParam2(value){
+    ws.send('["param2", %s]'.replace("%s", value));
+    var param2 = document.getElementById("param2");
+    param2.innerHTML = value;
 }
 
 function disable(button){
