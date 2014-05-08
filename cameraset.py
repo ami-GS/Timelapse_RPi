@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import threading
 from picamera import PiCamera
+from imageprocess import imageProcess
 import io
 
 class Camera(object):
@@ -14,6 +15,7 @@ class Camera(object):
         self.HEIGHT = HEIGHT
         self.camera = ""
         self.t = ""
+        self.pro = imageProcess()
 
     def takeImage(self):
         pass
@@ -30,13 +32,15 @@ class Camera(object):
         pass
 
     def setThread(self, target, args):
+        del self.t
         self.t = threading.Thread(target=target, args=args)
         self.t.setDaemon(True)
 
 class usbCamera(Camera):
-    def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360):
+    def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360, FPS=25):
         super(usbCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
         self.camera = cv2.VideoCapture(0)
+        self.framelate = FPS
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, WIDTH)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, HEIGHT)
 
@@ -45,19 +49,22 @@ class usbCamera(Camera):
         if _:
             cv2.imwrite("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()), img)
 
-    def _getFrame(self):
+    def _getFrame(self, process):
         _, img = self.camera.read()
         if _:
+            img = self.pro.assign(img, process) # assign each processing
             return img
         else:
             return -1
 
-    def getFrame(self):
-        img = self._getFrame()
-        return np.array(cv2.imencode(".jpg", img)[1]).tostring()
+    def getFrame(self, process="normal"):
+        img = self._getFrame(process)
+        encimg = cv2.imencode(".jpg", img)[1]
+        return np.array(encimg).tostring()
+#       return np.array(cv2.imencode(".jpg", img)[1]).tostring()
 
-    def getVideoFrame(self):
-        img = self._getFrame()
+    def getVideoFrame(self, process="normal"):
+        img = self._getFrame(process)
         return img
 
 class piCamera(Camera, PiCamera):
@@ -65,7 +72,7 @@ class piCamera(Camera, PiCamera):
         super(piCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
         super(Camera, self).__init__()
         self.resolution = (self.WIDTH, self.HEIGHT)
-        self.framerate = FPS
+        self.framelate = FPS
         self.camera.led = LED
         self.stream = io.BytesIO()
         self.stream2 = io.BytesIO()
@@ -76,7 +83,10 @@ class piCamera(Camera, PiCamera):
 
     def getVideoFrame(self):
         self.capture(self.stream2, format="jpeg") #this have error
+        self.stream2.seek(0)
         data = np.fromstring(self.stream2.getvalue(), dtype=np.uint8)
+        self.stream2.seek(0)
+        self.stream2.truncate()
         img = cv2.imdecode(data, 1)
         img = img[:, :, ::-1]
         return img
