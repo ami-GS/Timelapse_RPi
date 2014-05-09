@@ -23,7 +23,11 @@ RUN = False
 
 class HttpHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("./index.html")
+        with open("index.html", "r") as f:
+            for l in f.readlines():
+                self.write(l)
+        self.finish()
+        #self.render("./index.html")
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     def initialize(self, camera):
