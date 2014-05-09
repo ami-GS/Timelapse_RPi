@@ -19,8 +19,8 @@ Frames per second : <input type="number" id="fps" value="1.0" step="0.1" min="0"
 Video length : <input type="number" id="len" value="2.0" step="0.5" max="50" min="0.5" onmousedown="setInfo('');" /> seconds <br>
 <input type="button" id="start" value="start recording" onclick="startTimeLapse()"/><br>
 <div id="duration"></div>
-<script type="text/javascript">
-
+<script type="text/javascript" language="JavaScript" src="./index.js">
+/*
 var img = document.getElementById("liveImg");
 var duration = document.getElementById("duration");
 var count;
@@ -140,6 +140,7 @@ function motionMode(){ws.send('["motion"]');}
 function grayMode(){ws.send('["gray"]');}
 function normalMode(){ws.send('["normal"]');}
 function edgeMode(){ws.send('["edge"]');}
+*/
 </script>
 </body>
 </html>
