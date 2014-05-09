@@ -3,36 +3,50 @@
 </head>
 <title>livecamera</title>
 <body>
-<img id="liveImg" src="" width="480" height="360">
-<canvas id="canvas"></canvas><br>
-param1 <input type="range" min="0" max="255" value="100" onmousemove="chParam1(value)">
-<div id="param1">100</div><br>
-param2 <input type="range" min="0" max="255" value="200" onmousemove="chParam2(value)">
-<div id="param2">200</div><br>
+<div style="position: relative">
+    <canvas id="canvas1" width="500" height="380" style="position: absolute; left: 0; top: 0; z-index: 0"></canvas>
+    <canvas id="canvas2" width="480" height="360" style="position: relative; left: 10; top: 10; z-index: 1"></canvas>
+</div>
+<br>
+<div style="position: relative">
+    <p id="param1" style="position: absolute; z-index: 0; left: 220; top: -20">100</p>
+    param1 <input type="range" min="0" max="255" value="100" onmousemove="chParam1(value)" style="position: relative; z-index: 1"><br>
+</div>
+<div style="position: relative">
+    <p id="param2" style="position: absolute; z-index: 0; left: 220; top: -20">200</p>
+    param2 <input type="range" min="0" max="255" value="200" onmousemove="chParam2(value)" style="position: relative; z-index: 1"><br>
+</div>
 <form name="mode">
-<input type="button" id="normal" value="normal Mode" onclick="normalMode(), disable(this)" disabled="disabled">
-<input type="button" id="edge" value="edge Mode" onclick="edgeMode(), disable(this)">
-<input type="button" id="motion" value="motion Mode" onclick="motionMode(), disable(this)">
-<input type="button" id="gray" value="gray Mode" onclick="grayMode(), disable(this)">
+    <input type="button" id="normal" value="normal Mode" onclick="normalMode(), disable(this)" disabled="disabled">
+    <input type="button" id="edge" value="edge Mode" onclick="edgeMode(), disable(this)">
+    <input type="button" id="motion" value="motion Mode" onclick="motionMode(), disable(this)">
+    <input type="button" id="gray" value="gray Mode" onclick="grayMode(), disable(this)">
 </form>
 Frames per second : <input type="number" id="fps" value="1.0" step="0.1" min="0" max="8" onmousedown="setInfo('');"><br>
 Video length : <input type="number" id="len" value="2.0" step="0.5" max="50" min="0.5" onmousedown="setInfo('');" /> seconds <br>
 <input type="button" id="start" value="start recording" onclick="startTimeLapse()"/><br>
 <div id="duration"></div>
-<script type="text/javascript" language="JavaScript" src="./index.js">
-/*
-var img = document.getElementById("liveImg");
+<script type="text/javascript">
+var canvas2 = document.getElementById("canvas2");
+var context1 = document.getElementById("canvas1").getContext("2d");
+var context2 = canvas2.getContext("2d");
 var duration = document.getElementById("duration");
 var count;
+var img = new Image();
+var STATE;
 var ws = new WebSocket("ws://localhost:8080/camera");
 ws.binaryType = 'blob';
 
 window.onload = function(){
-        setInfo();
+    setInfo();
 };
 
 ws.onopen = function(){
-	console.log("connection was established");
+    console.log("connection was established");
+};
+
+img.onload = function(){
+    context2.drawImage(img,0,0);
 };
 
 ws.onmessage = function(evt){
@@ -47,7 +61,7 @@ ws.onmessage = function(evt){
         }
         else if(evt.data.indexOf("remaining") != -1){
             count = Number(evt.data.slice(10,evt.data.indexOf(".")+1)); //TODO receive remaining time
-            setInfo(STATE)
+            setInfo()
         }
     }
 };
@@ -58,13 +72,14 @@ window.onbeforeunload = function(){
 };
 
 function drawRec(){
-    var canvas = document.getElementById("canvas");
-    var context = canvas.getContext("2d");
-    context.fillStyle = "red";
-    context.font = "30px 'Arial'";
-    context.textAlign = "start";
-    context.textBaseline = "top";
-    context.fillText("REC", 0, 0, 200);
+    context1.lineWidth = 20;
+    context1.strokeStyle = "rgb(255,0,0)";
+    context1.strokeRect(0, 0, canvas1.width, canvas1.height);
+    context1.fillStyle = "black";
+    context1.font = "5px 'Arial'";
+    context1.textAlign = "start";
+    context1.textBaseline = "top";
+    context1.fillText("REC", 20, 0, 200);
 }
 
 function startTimeLapse() {
@@ -78,9 +93,9 @@ function startTimeLapse() {
 }
 
 var timer;
-function cntStart(){
-    timer = setInterval("cntDown()",1000);
-}
+    function cntStart(){
+        timer = setInterval("cntDown()",1000);
+    }
 
 function cntDown(){
     count -= 1;
@@ -98,7 +113,7 @@ function cntEnd(){
 }
 
 
-function setInfo(STATE){
+function setInfo(){
     if(STATE == "recording"){
         document.getElementById("start").disabled = true;
         cntStart()
@@ -140,7 +155,6 @@ function motionMode(){ws.send('["motion"]');}
 function grayMode(){ws.send('["gray"]');}
 function normalMode(){ws.send('["normal"]');}
 function edgeMode(){ws.send('["edge"]');}
-*/
 </script>
 </body>
 </html>

@@ -1,18 +1,26 @@
 /**
  * Created by daiki on 2014/05/09.
  */
-var img = document.getElementById("liveImg");
+var canvas2 = document.getElementById("canvas2");
+var context1 = document.getElementById("canvas1").getContext("2d");
+var context2 = canvas2.getContext("2d");
 var duration = document.getElementById("duration");
 var count;
+var img = new Image();
+var STATE;
 var ws = new WebSocket("ws://localhost:8080/camera");
 ws.binaryType = 'blob';
 
 window.onload = function(){
-        setInfo();
+    setInfo();
 };
 
 ws.onopen = function(){
-	console.log("connection was established");
+    console.log("connection was established");
+};
+
+img.onload = function(){
+    context2.drawImage(img,0,0);
 };
 
 ws.onmessage = function(evt){
@@ -27,7 +35,7 @@ ws.onmessage = function(evt){
         }
         else if(evt.data.indexOf("remaining") != -1){
             count = Number(evt.data.slice(10,evt.data.indexOf(".")+1)); //TODO receive remaining time
-            setInfo(STATE)
+            setInfo()
         }
     }
 };
@@ -38,13 +46,14 @@ window.onbeforeunload = function(){
 };
 
 function drawRec(){
-    var canvas = document.getElementById("canvas");
-    var context = canvas.getContext("2d");
-    context.fillStyle = "red";
-    context.font = "30px 'Arial'";
-    context.textAlign = "start";
-    context.textBaseline = "top";
-    context.fillText("REC", 0, 0, 200);
+    context1.lineWidth = 20;
+    context1.strokeStyle = "rgb(255,0,0)";
+    context1.strokeRect(0, 0, canvas1.width, canvas1.height);
+    context1.fillStyle = "black";
+    context1.font = "5px 'Arial'";
+    context1.textAlign = "start";
+    context1.textBaseline = "top";
+    context1.fillText("REC", 20, 0, 200);
 }
 
 function startTimeLapse() {
@@ -78,7 +87,7 @@ function cntEnd(){
 }
 
 
-function setInfo(STATE){
+function setInfo(){
     if(STATE == "recording"){
         document.getElementById("start").disabled = true;
         cntStart()
