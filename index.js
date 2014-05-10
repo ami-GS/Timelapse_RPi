@@ -1,13 +1,14 @@
 /**
  * Created by daiki on 2014/05/09.
  */
+var canvas1 = document.getElementById("canvas1");
+var context1 = canvas1.getContext("2d");
 var canvas2 = document.getElementById("canvas2");
-var context1 = document.getElementById("canvas1").getContext("2d");
 var context2 = canvas2.getContext("2d");
 var duration = document.getElementById("duration");
 var count;
 var img = new Image();
-var STATE;
+var STATE = "";
 var ws = new WebSocket("ws://localhost:8080/camera");
 ws.binaryType = 'blob';
 
@@ -56,6 +57,8 @@ function drawRec(){
     context1.fillText("REC", 20, 0, 200);
 }
 
+function removeRec(){context1.clearRect(0,0,canvas1.width, canvas1.height);}
+
 function startTimeLapse() {
     cntStart();
     drawRec();
@@ -67,9 +70,9 @@ function startTimeLapse() {
 }
 
 var timer;
-function cntStart(){
-    timer = setInterval("cntDown()",1000);
-}
+    function cntStart(){
+        timer = setInterval("cntDown()",1000);
+    }
 
 function cntDown(){
     count -= 1;
@@ -82,6 +85,8 @@ function cntDown(){
 }
 
 function cntEnd(){
+    STATE = "";
+    removeRec();
     duration.innerHTML = "Finish recording";
     clearInterval(timer);
 }
