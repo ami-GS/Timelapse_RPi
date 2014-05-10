@@ -163,7 +163,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             while CLIENT:
                 img = camera.getFrame(VIDEOMODE)
                 CLIENT[0].write_message(img, binary=True)
-                time.sleep(1.0/camera.framelate)
+                time.sleep(1.0/camera.framerate)
         except Exception as e:
             print "in loop", e
 
