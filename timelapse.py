@@ -24,10 +24,24 @@ RUN = False
 class HttpHandler(tornado.web.RequestHandler):
     def get(self):
         with open("index.html", "r") as f:
-            for l in f.readlines():
-                self.write(l)
-        self.finish()
+            for line in f.readlines():
+                self.write(line)
+        self.finish('<a href="/download"> Download </a>') # TODO Here should be appeared after finish recording.
         #self.render("./index.html")
+
+class downloadHandler(tornado.web.RequestHandler):
+    def get(self):
+        file_name = ("%s-%dfps.mp4" % (DIRNAME, FPS))
+        buf_size = 4096
+        self.set_header('Content-Type', 'application/octet-stream')
+        self.set_header('Content-Disposition', 'attachment; filename=' + file_name)
+        with open(file_name, 'r') as f:
+            while True:
+                data = f.read(buf_size)
+                if not data:
+                    break
+                self.write(data)
+        self.finish()
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     def initialize(self, camera):
@@ -98,6 +112,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.camera.num += 1
         if self.camera.num > LENGTH:
             self.callback.stop()
+            CLIENT.pop(1)
             sys.stdout.write("finish recording\n")
             sys.stdout.write("make video? (this is not recommended) [Y/n]")
             if raw_input() == "Y":
@@ -110,6 +125,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if self.camera.num > LENGTH:
             sys.stdout.write("finish recording\n")
             self.callback.stop()
+            CLIENT.pop(1)
             #self.camera.terminate()
             #sys.exit(1)
 
@@ -188,6 +204,7 @@ if __name__ == "__main__":
 
     app = tornado.web.Application([
                 (r"/", HttpHandler),
+                (r"/download", downloadHandler),
                 (r"/camera", WSHandler, dict(camera=camera)),
                 ])
 
