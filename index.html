@@ -26,6 +26,7 @@ Frames per second : <input type="number" id="fps" value="1.0" step="0.1" min="0"
 Video length : <input type="number" id="len" value="2.0" step="0.5" max="50" min="0.5" onmousedown="setInfo();" /> seconds <br>
 <input type="button" id="start" value="start recording" onclick="startTimeLapse()"/><br>
 <div id="duration"></div>
+<input id="download" type="button" onclick=window.open("/download") value="download" disabled="disabled">
 <script type="text/javascript">
 var canvas1 = document.getElementById("canvas1");
 var context1 = canvas1.getContext("2d");
@@ -63,6 +64,9 @@ ws.onmessage = function(evt){
         else if(evt.data.indexOf("remaining") != -1){
             count = Number(evt.data.slice(10,evt.data.indexOf(".")+1)); //TODO receive remaining time
             setInfo()
+        }
+        else if(evt.data == "finish"){
+            //make synchronize with server
         }
     }
 };
@@ -115,6 +119,7 @@ function cntEnd(){
     removeRec();
     duration.innerHTML = "Finish recording";
     clearInterval(timer);
+    document.getElementById("download").disabled = false;
 }
 
 

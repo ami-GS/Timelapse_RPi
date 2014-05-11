@@ -26,7 +26,7 @@ class HttpHandler(tornado.web.RequestHandler):
         with open("index.html", "r") as f:
             for line in f.readlines():
                 self.write(line)
-        self.finish('<a href="/download"> Download </a>') # TODO Here should be appeared after finish recording.
+        #self.finish() # TODO Here should be appeared after finish recording. -> DONE
         #self.render("./index.html")
 
 class downloadHandler(tornado.web.RequestHandler):
