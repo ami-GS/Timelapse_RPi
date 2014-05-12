@@ -205,6 +205,7 @@ if __name__ == "__main__":
     app = tornado.web.Application([
                 (r"/", HttpHandler),
                 (r"/download", downloadHandler),
+                (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": "./js/"}),
                 (r"/camera", WSHandler, dict(camera=camera)),
                 ])
 

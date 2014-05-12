@@ -38,6 +38,9 @@ ws.onmessage = function(evt){
             count = Number(evt.data.slice(10,evt.data.indexOf(".")+1)); //TODO receive remaining time
             setInfo()
         }
+        else if(evt.data == "finish"){
+            //make synchronize with server
+        }
     }
 };
 
@@ -89,6 +92,7 @@ function cntEnd(){
     removeRec();
     duration.innerHTML = "Finish recording";
     clearInterval(timer);
+    document.getElementById("download").disabled = false;
 }
 
 
