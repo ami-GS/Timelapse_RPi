@@ -28,6 +28,7 @@ class imageProcess():
 
     def edgeDetect(self, img):
         img = cv2.Canny(img, self.param1, self.param2)
+        img = cv2.cvtColor(img, cv2.cv.CV_GRAY2RGB)
         return img
 
     def grayImage(self, img):
@@ -41,4 +42,5 @@ class imageProcess():
         tmp = cv2.absdiff(tmp1, tmp2)
         tmp = cv2.threshold(tmp, self.param1, self.param2, cv2.cv.CV_THRESH_BINARY)[1]
         self.prev = img
+        tmp = cv2.cvtColor(tmp, cv2.cv.CV_GRAY2RGB)
         return tmp
