@@ -57,11 +57,12 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 self.write_message("remaining:%f" % (float(LENGTH-self.camera.num)/FPS)) # TODO send remaining time
             else:
                 sys.stdout.write("%s : connection refused" % self.request.remote_ip)
-                self.on_close(); return
+                self.on_close()
+                return
         elif len(CLIENT) == 0:
             CLIENT.append(self)
 
-        self.setCameraThread(self.camera)
+        self.setCameraLoop(self.camera)
 
         self.camera.t.start()
         self.callback = ""
@@ -84,53 +85,52 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
         message = json.loads(message)
 
-        if len(message) == 2:
-            if message[0] == "fps":
-                FPS = float(message[1])
-            elif message[0] == "length":
-                LENGTH = float(message[1])
-                LENGTH = LENGTH*ENCODEFPS
-            elif message[0] == "param1":
-                self.camera.pro.setParam(param1=int(message[1]))
-            elif message[0] == "param2":
-                self.camera.pro.setParam(param2=int(message[1]))
-
-        elif len(message) == 1:
-            global VIDEOMODE
-            VIDEOMODE = message[0]
-
-        if FPS and LENGTH:
+        if message[0] == "fps":
+            FPS = float(message[1])
+        elif message[0] == "length":
+            LENGTH = float(message[1])
+            LENGTH = LENGTH*ENCODEFPS
+        elif message[0] == "param1":
+            self.camera.pro.setParam(param1=int(message[1]))
+        elif message[0] == "param2":
+            self.camera.pro.setParam(param2=int(message[1]))
+        elif message[0] == "start":
             if DIRNAME not in os.listdir("./"):
                 print("create directory.... %s" % DIRNAME)
                 os.mkdir("./%s" % DIRNAME)
 
             print("This will finish in %d second" % int(int(LENGTH)/int(FPS)))
             run()
+        else:
+            global VIDEOMODE
+            VIDEOMODE = message[0]
 
     def takeConsecutiveImages(self):
         self.camera.takeImage()
         self.camera.num += 1
         if self.camera.num > LENGTH:
-            self.callback.stop()
-            CLIENT.pop(1)
-            sys.stdout.write("finish recording\n")
+            self.finishRecording()
             sys.stdout.write("make video? (this is not recommended) [Y/n]")
             if raw_input() == "Y":
                 self.writer.ffmpeg()
 
     def videoWriter(self):
-        img = self.camera.getVideoFrame()
+        img = self.camera.getVideoFrame(VIDEOMODE)
         self.camera.num += 1
         self.writer.write(img)
         if self.camera.num > LENGTH:
-            sys.stdout.write("finish recording\n")
-            self.callback.stop()
-            CLIENT.pop(1)
+            self.finishRecording()
             #self.camera.terminate()
             #sys.exit(1)
 
+    def finishRecording(self):
+        sys.stdout.write("finish recording\n")
+        self.callback.stop()
+        CLIENT.pop(1) #make state be non-recording
+        self.write_message("finish")
+
     @classmethod
-    def setCameraThread(self, camera):
+    def setCameraLoop(self, camera):
         if isinstance(camera, cameraset.usbCamera):
             camera.setThread(target=WSHandler.loop, args=(camera,))
         elif isinstance(camera, cameraset.piCamera):
@@ -200,7 +200,7 @@ if __name__ == "__main__":
         camera = cameraset.piCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
     except:
         camera = cameraset.usbCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
-    WSHandler.setCameraThread(camera)
+    WSHandler.setCameraLoop(camera)
 
     app = tornado.web.Application([
                 (r"/", HttpHandler),

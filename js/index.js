@@ -70,6 +70,7 @@ function startTimeLapse() {
     var length = document.getElementById("len").value;
     ws.send('["fps", %s]'.replace("%s", fps));
     ws.send('["length", %s]'.replace("%s", length));
+    ws.send('["start"]');
 }
 
 var timer;
