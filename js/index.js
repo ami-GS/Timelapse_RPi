@@ -40,9 +40,24 @@ ws.onmessage = function(evt){
         }
         else if(evt.data == "finish"){
             //make synchronize with server
+            cntEnd();
         }
     }
 };
+
+var isMouseDown = false;
+document.onmousedown = function() { isMouseDown = true };
+document.onmouseup   = function() { isMouseDown = false };
+function mousedrag(obj){
+    if (isMouseDown){
+        if(obj.id == "range1"){
+            chParam1(obj.value);
+        }
+        else if(obj.id == "range2"){
+            chParam2(obj.value);
+        }
+    }
+}
 
 window.onbeforeunload = function(){
     ws.close(1000); //Is this needed??
@@ -117,12 +132,12 @@ function updateInfo(time){
 }
 
 function chParam1(value){
-    ws.send('["param1", %s]'.replace("%s", value));
+    ws.send('["param1", %s]'.replace("%s", value)); // TODO here should be optimize
     var param1 = document.getElementById("param1");
     param1.innerHTML = value;
 }
 function chParam2(value){
-    ws.send('["param2", %s]'.replace("%s", value));
+    ws.send('["param2", %s]'.replace("%s", value)); // TODO here should be optimize
     var param2 = document.getElementById("param2");
     param2.innerHTML = value;
 }
