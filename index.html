@@ -3,17 +3,18 @@
 </head>
 <title>livecamera</title>
 <body>
-<div style="position: relative">
-    <canvas id="canvas1" width="500" height="380" style="position: absolute; left: 0; top: 0; z-index: 0"></canvas>
+<div style="text-align: center; margin-left: auto; margin-right: auto;">
+<div style="position: relative; margin-left: auto">
+    <canvas id="canvas1" width="500" height="380" style="position: absolute; z-index: 0"></canvas>
     <canvas id="canvas2" width="480" height="360" style="position: relative; left: 10; top: 10; z-index: 1"></canvas>
 </div>
 <br>
-<div style="position: relative">
-    <p id="param1" style="position: absolute; z-index: 0; left: 220; top: -20">100</p>
+<div style="position: relative; margin-left: auto">
+    <p id="param1" style="position: absolute; z-index: 0; left: 60%; top: -20">100</p>
     param1 <input type="range" min="0" id="range1" max="255" value="100" onmousemove="mousedrag(this)" style="position: relative; z-index: 1"><br>
 </div>
-<div style="position: relative">
-    <p id="param2" style="position: absolute; z-index: 0; left: 220; top: -20">200</p>
+<div style="position: relative; margin-left: auto">
+    <p id="param2" style="position: absolute; z-index: 0; left: 60%; top: -20">200</p>
     param2 <input type="range" id="range2" min="0" max="255" value="200" onmousemove="mousedrag(this)" style="position: relative; z-index: 1"><br>
 </div>
 <form name="mode">
@@ -29,5 +30,6 @@ Video length : <input type="number" id="len" value="2.0" step="0.5" max="50" min
 <input id="download" type="button" onclick=window.open("/download") value="download" disabled="disabled">
 <script type="text/javascript" src="js/index.js">
 </script>
+</div>
 </body>
 </html>
