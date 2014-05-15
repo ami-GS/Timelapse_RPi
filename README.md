@@ -9,8 +9,9 @@ Time lapse camera for Raspberry Pi
 `
 python timelapse.py
 `
-access to Raspberry Pi using browser (http://raspberrypi.local:8080)
-set the fps and video length, finally it returns time until the recordng will have finished.
+
+Please access to Raspberry Pi using browser (http://raspberrypi.local:8080)
+set the fps and video length by using form, finally it returns time until the recordng will have finished.
 
 ### Requirements
 * opencv
