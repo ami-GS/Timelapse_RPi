@@ -195,6 +195,18 @@ def mainLoop(camera, FPS, LENGTH):
                 writer.ffmpeg()
             break
 
+#TODO ws server hostname should be change according to user's RPi.
+def changejsfile(fname):
+    jsfile = ""
+    with open(fname, "rw") as fr:
+        for line in fr.readlines():
+            if "HOSTNAME" in line:
+                import socket
+                line = line[:line.index("HOSTNAME")]+socket.gethostbyname(socket.gethostname())+line[line.index("HOSTNAME")+len("HOSTNAME"):]
+            jsfile += line
+        print jsfile
+        fr.write(jsfile)
+
 if __name__ == "__main__":
     try:
         camera = cameraset.piCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
