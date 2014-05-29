@@ -12,7 +12,13 @@ var STATE = "";
 var ws = new WebSocket("ws://localhost:8080/camera");
 ws.binaryType = 'blob';
 
+
 window.onload = function(){
+    context1.fillStyle = "blue";
+    context1.font = "bold 20px Arial";
+    context1.textAlign = "center";
+    context1.textBaseline = "middle";
+    context1.fillText("No connection", canvas1.width/2, canvas1.height/2);
     setInfo();
 };
 
