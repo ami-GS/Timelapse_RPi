@@ -17,12 +17,41 @@
     <p id="param2" style="position: absolute; z-index: 0; left: 60%; top: -20">200</p>
     param2 <input type="range" id="range2" min="0" max="255" value="200" onmousemove="mousedrag(this)" style="position: relative; z-index: 1"><br>
 </div>
+<div>
 <form name="mode">
     <input type="button" id="normal" value="normal Mode" onclick="normalMode(), disable(this)" disabled="disabled">
     <input type="button" id="edge" value="edge Mode" onclick="edgeMode(), disable(this)">
     <input type="button" id="motion" value="motion Mode" onclick="motionMode(), disable(this)">
     <input type="button" id="gray" value="gray Mode" onclick="grayMode(), disable(this)">
 </form>
+</div>
+<div>
+    <form name="radio">
+    <input type="radio" name="mode" value="none" checked onclick="chmd(this.value)">none
+    <input type="radio" name="mode" value="sketch" onclick="chmd(this.value)">sketch
+    <input type="radio" name="mode" value="posterise" onclick="chmd(this.value)">posterise
+    <input type="radio" name="mode" value="gpen" onclick="chmd(this.value)">gpen
+    <input type="radio" name="mode" value="colorbalance" onclick="chmd(this.value)">colorbalance
+    <input type="radio" name="mode" value="film" onclick="chmd(this.value)">film
+    <input type="radio" name="mode" value="pastel" onclick="chmd(this.value)">pastel
+    <input type="radio" name="mode" value="emboss" onclick="chmd(this.value)">emboss
+    <input type="radio" name="mode" value="denoise" onclick="chmd(this.value)">denoise
+    <input type="radio" name="mode" value="negative" onclick="chmd(this.value)">negative
+    <input type="radio" name="mode" value="hatch" onclick="chmd(this.value)">hatch
+    <input type="radio" name="mode" value="colorswap" onclick="chmd(this.value)">colorswap
+    <input type="radio" name="mode" value="colorpoint" onclick="chmd(this.value)">colorpoint
+    <input type="radio" name="mode" value="saturation" onclick="chmd(this.value)">saturation
+    <input type="radio" name="mode" value="blackboard" onclick="chmd(this.value)">blackboard
+    <input type="radio" name="mode" value="blur" onclick="chmd(this.value)">blur
+    <input type="radio" name="mode" value="posterize" onclick="chmd(this.value)">posterize
+    <input type="radio" name="mode" value="watercolor" onclick="chmd(this.value)">watercolor
+    <input type="radio" name="mode" value="cartoon" onclick="chmd(this.value)">cartoon
+    <input type="radio" name="mode" value="whiteboard" onclick="chmd(this.value)">whiteboard
+    <input type="radio" name="mode" value="washedout" onclick="chmd(this.value)">washedout
+    <input type="radio" name="mode" value="solarize" onclick="chmd(this.value)">solarize
+    <input type="radio" name="mode" value="oilpaint" onclick="chmd(this.value)">oilpaint
+    </form>
+</div>
 Frames per second : <input type="number" id="fps" value="1.0" step="0.1" min="0" max="8" onchange="setInfo();"><br>
 Video length : <input type="number" id="len" value="2.0" step="0.5" max="50" min="0.5" onchange="setInfo();" /> seconds <br>
 <input type="button" id="start" value="start recording" onclick="startTimeLapse()"/><br>

@@ -160,3 +160,8 @@ function motionMode(){ws.send('["motion"]');}
 function grayMode(){ws.send('["gray"]');}
 function normalMode(){ws.send('["normal"]');}
 function edgeMode(){ws.send('["edge"]');}
+
+function chmd(radio){
+    ws.send('["%s"]' % radio);
+
+}
