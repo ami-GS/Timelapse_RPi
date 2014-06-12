@@ -140,6 +140,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     @staticmethod
     def rloop(camera):
+        #TODO susbend loop to make stable when change the mode
         try:
             for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
                 camera.stream.seek(0)

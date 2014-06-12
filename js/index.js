@@ -162,6 +162,5 @@ function normalMode(){ws.send('["normal"]');}
 function edgeMode(){ws.send('["edge"]');}
 
 function chmd(radio){
-    ws.send('["%s"]' % radio);
-
+    ws.send('[\"'+radio+'\"]');
 }
