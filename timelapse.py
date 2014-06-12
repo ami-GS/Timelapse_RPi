@@ -104,6 +104,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         else:
             global VIDEOMODE
             VIDEOMODE = message[0]
+            if isinstance(camera, cameraset.piCamera):
+                camera.image_effect = VIDEOMODE
 
     def takeConsecutiveImages(self):
         self.camera.takeImage()
@@ -169,6 +171,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         global CLIENT
+        #print self.close_reason, self.close_code # TODO try to connect again when RPi stops sending
+        #about above, the error occurs in javascript code, and it could not be catch the error.
         print("%s : connection closed" % self.request.remote_ip)
 
         if len(CLIENT) != 2:
