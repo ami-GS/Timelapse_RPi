@@ -16,7 +16,6 @@ ZFILL = 7
 ENCODEFPS = 25
 FPS = 0
 LENGTH = 0
-VIDEOMODE = "normal"
 CLIENT = [] #[websocket connection object, ip address which recording]
 RUN = False
 
@@ -65,7 +64,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.setCameraLoop(self.camera)
 
         self.camera.t.start()
-        self.callback = ""
+        self.callback = None
         sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
     def on_message(self, message):
@@ -102,10 +101,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             print("This will finish in %d second" % int(int(LENGTH)/int(FPS)))
             run()
         else:
-            global VIDEOMODE
-            VIDEOMODE = message[0]
-            if isinstance(camera, cameraset.piCamera):
-                camera.image_effect = VIDEOMODE
+            self.camera.setMode(message[0])
 
     def takeConsecutiveImages(self):
         self.camera.takeImage()
@@ -117,7 +113,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 self.writer.ffmpeg()
 
     def videoWriter(self):
-        img = self.camera.getVideoFrame(VIDEOMODE)
+        img = self.camera.getVideoFrame()
         self.camera.num += 1
         self.writer.write(img)
         if self.camera.num > LENGTH:
@@ -143,15 +139,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         #TODO susbend loop to make stable when change the mode
         try:
             for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
+                camera.config()
                 camera.stream.seek(0)
                 img = camera.stream.read()
-                #img = np.fromstring(img, dtype=np.uint8).tostring()
-                #img = cv2.imdecode(img,1)#.tostring()
-                #img = img[:,:,::-1]
-                #img = pro.assign(img,VIDEOMODE)
-                #error here
-                #result, img = cv2.imencode(".jpg", img, [1,90])
-                #img = np.array(img).tostring()
                 CLIENT[0].write_message(img, binary=True)
                 camera.stream.seek(0)
                 camera.stream.truncate()
@@ -164,7 +154,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def loop(camera):
         try:
             while CLIENT:
-                img = camera.getFrame(VIDEOMODE)
+                img = camera.getFrame()
                 CLIENT[0].write_message(img, binary=True)
                 time.sleep(1.0/camera.framerate)
         except Exception as e:

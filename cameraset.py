@@ -1,10 +1,10 @@
 import time
 import cv2
 import numpy as np
-import threading
-from picamera import PiCamera
+from threading import Thread, Event
 from imageprocess import imageProcess
 import io
+from picamera import PiCamera # here cause warning
 
 class Camera(object):
     def __init__(self, DIRNAME, ZFILL, WIDTH, HEIGHT):
@@ -13,9 +13,17 @@ class Camera(object):
         self.ZFILL = ZFILL
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
-        self.camera = ""
-        self.t = ""
+        self.camera = None
+        self.t = None
+        self.event = Event()
         self.pro = imageProcess()
+        self.config = self._configPass()
+        self.MODE = "none"
+
+    def setMode(self, mode):
+        self.MODE = mode
+        if isinstance(self.camera, piCamera):
+            self.camera.image_effect = mode
 
     def takeImage(self):
         pass
@@ -25,6 +33,13 @@ class Camera(object):
         self.num += 1
         return stamp
 
+    def _configPass(self):
+        pass
+
+    def _configWait(self):
+        self.event.wait(1)
+        self.config = self._configPass()
+
     def terminate(self):
         del self.camera
 
@@ -33,7 +48,7 @@ class Camera(object):
 
     def setThread(self, target, args):
         del self.t
-        self.t = threading.Thread(target=target, args=args)
+        self.t = Thread(target=target, args=args)
         self.t.setDaemon(True)
 
 class usbCamera(Camera):
@@ -49,22 +64,22 @@ class usbCamera(Camera):
         if _:
             cv2.imwrite("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()), img)
 
-    def _getFrame(self, process):
+    def _getFrame(self):
         _, img = self.camera.read()
         if _:
-            img = self.pro.assign(img, process) # assign each processing
+            img = self.pro.assign(img, self.MODE) # assign each processing
             return img
         else:
             return -1
 
-    def getFrame(self, process="normal"):
-        img = self._getFrame(process)
+    def getFrame(self):
+        img = self._getFrame()
         encimg = cv2.imencode(".jpg", img)[1]
         return np.array(encimg).tostring()
 #       return np.array(cv2.imencode(".jpg", img)[1]).tostring()
 
-    def getVideoFrame(self, process="normal"):
-        img = self._getFrame(process)
+    def getVideoFrame(self):
+        img = self._getFrame()
         return img
 
 class piCamera(Camera, PiCamera):
