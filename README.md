@@ -20,6 +20,11 @@ Finally, the time lapse video will be created automatically, so you should downl
 * picamera
 * numpy
 
+### TODO
+* Change client interface when RPi is using camera module or not.
+* Make it possible to record video from RPi camera module
+
 # warning
 You cannot record when you use Raspberry pi camera module (there are bugs yet sorry)
 However, USB camera is available.
+
