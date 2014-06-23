@@ -48,6 +48,14 @@ ws.onmessage = function(evt){
             //make synchronize with server
             cntEnd();
         }
+		else if(evt.data.indexOf("camType" != -1)){
+			if(evt.data.indexOf("USB") != -1){
+				//change interface to USB
+			}
+			else if(evt.data.indexOf("RPi") != -1){
+				//change interface to RPi cam module
+			}
+		}
     }
 };
 

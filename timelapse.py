@@ -65,6 +65,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
         self.camera.t.start()
         self.callback = None
+        #self.write_message("camType:RPi") # here is suitable?
+        #self.write_message("camType:USB")
         sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
     def on_message(self, message):
