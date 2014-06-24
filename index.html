@@ -11,21 +11,21 @@
 <br>
 <div style="position: relative; margin-left: auto">
     <p id="param1" style="position: absolute; z-index: 0; left: 60%; top: -20">100</p>
-    param1 <input type="range" min="0" id="range1" max="255" value="100" onmousemove="mousedrag(this)" style="position: relative; z-index: 1"><br>
+    param1 <input type="range" id="range1" min="0" max="255" value="100" onmousemove="chParam(this)" style="position: relative; z-index: 1"><br>
 </div>
 <div style="position: relative; margin-left: auto">
     <p id="param2" style="position: absolute; z-index: 0; left: 60%; top: -20">200</p>
-    param2 <input type="range" id="range2" min="0" max="255" value="200" onmousemove="mousedrag(this)" style="position: relative; z-index: 1"><br>
+    param2 <input type="range" id="range2" min="0" max="255" value="200" onmousemove="chParam(this)" style="position: relative; z-index: 1"><br>
 </div>
-<div>
-<form name="mode">
-    <input type="button" id="normal" value="normal Mode" onclick="normalMode(), disable(this)" disabled="disabled">
-    <input type="button" id="edge" value="edge Mode" onclick="edgeMode(), disable(this)">
-    <input type="button" id="motion" value="motion Mode" onclick="motionMode(), disable(this)">
-    <input type="button" id="gray" value="gray Mode" onclick="grayMode(), disable(this)">
+<div id="effectDiv">
+<form name="mode" id="radioSet">
+    <input type="radio" name="mode" value="none" checked onclick="chmd(this.value)">normal
+    <input type="radio" name="mode" value="edge" onclick="chmd(this.value)">edge
+    <input type="radio" name="mode" value="motion" onclick="chmd(this.value)">motion
+    <input type="radio" name="mode" value="gray" onclick="chmd(this.value)">gray
 </form>
 </div>
-<div>
+<div id="effectDiv2">
     <form name="radio">
     <input type="radio" name="mode" value="none" checked onclick="chmd(this.value)">none
     <input type="radio" name="mode" value="sketch" onclick="chmd(this.value)">sketch

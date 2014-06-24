@@ -51,25 +51,28 @@ ws.onmessage = function(evt){
 		else if(evt.data.indexOf("camType" != -1)){
 			if(evt.data.indexOf("USB") != -1){
 				//change interface to USB
+                showEffectButton(true);
 			}
 			else if(evt.data.indexOf("RPi") != -1){
 				//change interface to RPi cam module
+                showEffectButton(false)
 			}
 		}
     }
 };
 
-var isMouseDown = false;
-document.onmousedown = function() { isMouseDown = true };
-document.onmouseup   = function() { isMouseDown = false };
-function mousedrag(obj){
-    if (isMouseDown){
-        if(obj.id == "range1"){
-            chParam1(obj.value);
-        }
-        else if(obj.id == "range2"){
-            chParam2(obj.value);
-        }
+function showEffectButton(camType){
+    var elm = document.createElement("input");
+    elm.type = "radio";
+    elm.name = "mode";
+    elm.value = "test";
+    elm.setAttribute("onclick", new Function("chmd()"));
+    elm.innerHTML = "tententtenetnet";
+    var parent = document.getElementById("radioSet");
+    parent.appendChild(elm);
+    if(camType){//RPi
+    }
+    else{//USB
     }
 }
 
@@ -103,9 +106,9 @@ function startTimeLapse() {
 }
 
 var timer;
-    function cntStart(){
-        timer = setInterval("cntDown()",1000);
-    }
+function cntStart(){
+    timer = setInterval("cntDown()",1000);
+}
 
 function cntDown(){
     count -= 1;
@@ -145,29 +148,16 @@ function updateInfo(time){
     duration.innerHTML = tmp;
 }
 
-function chParam1(value){
-    ws.send('["param1", %s]'.replace("%s", value)); // TODO here should be optimize
-    var param1 = document.getElementById("param1");
-    param1.innerHTML = value;
+var isMouseDown = false;
+document.onmousedown = function() { isMouseDown = true };
+document.onmouseup   = function() { isMouseDown = false };
+function chParam(slider){
+    if (isMouseDown){
+        ws.send('[\"'+slider.id + ', ' + slider.value + '\"]');
+        var s = document.getElementById("param"+slider.id[slider.id.length-1]);
+        s.innerHTML = slider.value;
+    }
 }
-function chParam2(value){
-    ws.send('["param2", %s]'.replace("%s", value)); // TODO here should be optimize
-    var param2 = document.getElementById("param2");
-    param2.innerHTML = value;
-}
-
-function disable(button){
-    document.getElementById("motion").disabled = false;
-    document.getElementById("gray").disabled = false;
-    document.getElementById("normal").disabled = false;
-    document.getElementById("edge").disabled = false;
-    button.disabled = true;
-}
-
-function motionMode(){ws.send('["motion"]');}
-function grayMode(){ws.send('["gray"]');}
-function normalMode(){ws.send('["normal"]');}
-function edgeMode(){ws.send('["edge"]');}
 
 function chmd(radio){
     ws.send('[\"'+radio+'\"]');
