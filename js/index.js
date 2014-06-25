@@ -7,6 +7,11 @@ var canvas2 = document.getElementById("canvas2");
 var context2 = canvas2.getContext("2d");
 var duration = document.getElementById("duration");
 var count;
+var effectType = {"USB":['normal', 'edge', 'motion', 'gray'],
+                  "RPi":['none', 'sketch', 'posterise', 'gpen', 'colorblalance', 'film',
+                      'pastel', 'emboss', 'denoise', 'negative', 'hatch', 'colorswap',
+                      'colorpoint', 'saturation', 'blackboard', 'blur', 'posterize',
+                      'watercolor', 'cartoon', 'whiteboard', 'solarize', 'oilpaint']};
 var img = new Image();
 var STATE = "";
 var ws = new WebSocket("ws://localhost:8080/camera");
@@ -49,30 +54,27 @@ ws.onmessage = function(evt){
             cntEnd();
         }
 		else if(evt.data.indexOf("camType" != -1)){
-			if(evt.data.indexOf("USB") != -1){
-				//change interface to USB
-                showEffectButton(true);
-			}
-			else if(evt.data.indexOf("RPi") != -1){
-				//change interface to RPi cam module
-                showEffectButton(false)
-			}
+            showEffectButton(effectType[evt.data.slice(-3)]); //extract 'USB' or 'RPi'
 		}
     }
 };
 
-function showEffectButton(camType){
-    var elm = document.createElement("input");
-    elm.type = "radio";
-    elm.name = "mode";
-    elm.value = "test";
-    elm.setAttribute("onclick", new Function("chmd()"));
-    elm.innerHTML = "tententtenetnet";
+function showEffectButton(camTypes){
+    var elm;
+    var lab;
     var parent = document.getElementById("radioSet");
-    parent.appendChild(elm);
-    if(camType){//RPi
-    }
-    else{//USB
+    for(i = 0; i < camTypes.length; i++){
+        elm = document.createElement("input");
+        lab = document.createElement("label");
+        elm.type = "radio";
+        elm.id = "radio".concat(i.toString());
+        elm.name = "mode";
+        elm.value = camTypes[i];
+        elm.onclick = function(){chmd(this.value);};
+        lab.htmlFor = elm.id;
+        lab.appendChild(document.createTextNode(camTypes[i]));
+        parent.appendChild(elm);
+        parent.appendChild(lab);
     }
 }
 
@@ -160,5 +162,6 @@ function chParam(slider){
 }
 
 function chmd(radio){
+    alert(radio);
     ws.send('[\"'+radio+'\"]');
 }
