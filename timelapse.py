@@ -30,7 +30,7 @@ class HttpHandler(tornado.web.RequestHandler):
 
 class downloadHandler(tornado.web.RequestHandler):
     def get(self):
-        file_name = ("%s-%dfps.mp4" % (DIRNAME, FPS))
+        file_name = (DIRNAME+"/%s-%dfps.mp4" % (DIRNAME, FPS))
         buf_size = 4096
         self.set_header('Content-Type', 'application/octet-stream')
         self.set_header('Content-Disposition', 'attachment; filename=' + file_name)
@@ -47,8 +47,18 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.camera = camera
 
     def open(self):
-        global CLIENT
+        self.sendInit()
+        self.setCameraLoop(self.camera)
+        self.camera.t.start()
+        self.callback = None
+        sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
+    def sendInit(self):
+        if isinstance(self.camera, cameraset.usbCamera):
+            self.write_message("camType:USB")#for client effect radio button
+        else:
+            self.write_message("camType:RPi")
+        global CLIENT
         if len(CLIENT) == 2:
             if CLIENT[1] == self.request.remote_ip:
                 CLIENT[0] = self
@@ -60,14 +70,6 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 return
         elif len(CLIENT) == 0:
             CLIENT.append(self)
-
-        self.setCameraLoop(self.camera)
-
-        self.camera.t.start()
-        self.callback = None
-        #self.write_message("camType:RPi") # here is suitable?
-        #self.write_message("camType:USB")
-        sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
     def on_message(self, message):
         def run():
