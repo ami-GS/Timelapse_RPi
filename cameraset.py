@@ -21,9 +21,7 @@ class Camera(object):
         self.MODE = "none"
 
     def setMode(self, mode):
-        self.MODE = mode
-        if isinstance(self.camera, piCamera):
-            self.camera.image_effect = mode
+        pass
 
     def takeImage(self):
         pass
@@ -58,6 +56,9 @@ class usbCamera(Camera):
         self.framerate = FPS
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, WIDTH)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, HEIGHT)
+
+    def setMode(self, mode):
+        self.MODE = mode
 
     def takeImage(self):
         _, img = self.camera.read()
@@ -95,6 +96,9 @@ class piCamera(Camera, PiCamera):
 
     def takeImage(self):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
+
+    def setMode(self, mode):
+        self.camera.image_effect = mode
 
     def getVideoFrame(self):
         self.capture(self.stream2, format="jpeg") #this have error

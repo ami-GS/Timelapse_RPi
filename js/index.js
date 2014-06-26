@@ -56,6 +56,9 @@ ws.onmessage = function(evt){
 		else if(evt.data.indexOf("camType" != -1)){
             showEffectButton(effectType[evt.data.slice(-3)]); //extract 'USB' or 'RPi'
 		}
+        //else if(evt.data.indexOf("effect") != -1){
+        //    setClicked();//TODO initial setting of clicked button
+        //}
     }
 };
 
@@ -155,13 +158,12 @@ document.onmousedown = function() { isMouseDown = true };
 document.onmouseup   = function() { isMouseDown = false };
 function chParam(slider){
     if (isMouseDown){
-        ws.send('[\"'+slider.id + ', ' + slider.value + '\"]');
+        ws.send('[\"'+slider.id + '\", \"' + slider.value + '\"]');
         var s = document.getElementById("param"+slider.id[slider.id.length-1]);
         s.innerHTML = slider.value;
     }
 }
 
 function chmd(radio){
-    alert(radio);
     ws.send('[\"'+radio+'\"]');
 }

@@ -87,15 +87,14 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         global FPS, LENGTH
 
         message = json.loads(message)
-
         if message[0] == "fps":
             FPS = float(message[1])
         elif message[0] == "length":
             LENGTH = float(message[1])
             LENGTH = LENGTH*ENCODEFPS
-        elif message[0] == "param1":
+        elif message[0] == "range1":
             self.camera.pro.setParam(param1=int(message[1]))
-        elif message[0] == "param2":
+        elif message[0] == "range2":
             self.camera.pro.setParam(param2=int(message[1]))
         elif message[0] == "start":
             if DIRNAME not in os.listdir("./"):

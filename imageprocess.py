@@ -3,7 +3,7 @@ import cv2
 
 class imageProcess():
     def __init__(self):
-        self.prev = ""
+        self.prev = None
         self.param1 = 100
         self.param2 = 200
         pass
@@ -13,7 +13,7 @@ class imageProcess():
         self.param2 = param2
 
     def assign(self, img, process):
-        if process == "normal":
+        if process == "none":
             self.prev = img
             return img
 
