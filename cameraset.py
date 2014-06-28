@@ -17,7 +17,7 @@ class Camera(object):
         self.t = None
         self.event = Event()
         self.pro = imageProcess()
-        self.config = self._configPass()
+        self.config = self._configPass
         self.MODE = "none"
 
     def setMode(self, mode):
@@ -35,8 +35,8 @@ class Camera(object):
         pass
 
     def _configWait(self):
-        self.event.wait(1)
-        self.config = self._configPass()
+        self.event.wait(0.5)
+        self.config = self._configPass
 
     def terminate(self):
         del self.camera
@@ -98,7 +98,8 @@ class piCamera(Camera, PiCamera):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
 
     def setMode(self, mode):
-        self.camera.image_effect = mode
+        self.image_effect = mode
+        self.config = self._configWait
 
     def getVideoFrame(self):
         self.capture(self.stream2, format="jpeg") #this have error
