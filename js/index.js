@@ -8,10 +8,10 @@ var context2 = canvas2.getContext("2d");
 var duration = document.getElementById("duration");
 var count;
 var effectType = {"USB":['normal', 'edge', 'motion', 'gray'],
-                  "RPi":['none', 'sketch', 'posterise', 'gpen', 'colorblalance', 'film',
+                  "RPi":['none', 'sketch', 'posterise', 'gpen', 'colorbalance', 'film',
                       'pastel', 'emboss', 'denoise', 'negative', 'hatch', 'colorswap',
-                      'colorpoint', 'saturation', 'blackboard', 'blur', 'posterize',
-                      'watercolor', 'cartoon', 'whiteboard', 'solarize', 'oilpaint']};
+                      'colorpoint', 'saturation', 'blur', 'posterise',
+                      'watercolor', 'cartoon', 'solarize', 'oilpaint']};
 var img = new Image();
 var STATE = "";
 var ws = new WebSocket("ws://localhost:8080/camera");
