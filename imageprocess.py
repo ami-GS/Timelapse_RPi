@@ -13,7 +13,7 @@ class imageProcess():
         self.param2 = param2
 
     def assign(self, img, process):
-        if process == "none":
+        if process == "normal":
             self.prev = img
             return img
 

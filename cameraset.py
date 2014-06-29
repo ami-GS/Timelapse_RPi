@@ -18,7 +18,8 @@ class Camera(object):
         self.event = Event()
         self.pro = imageProcess()
         self.config = self._configPass
-        self.MODE = "none"
+        self.MODE = "normal"
+        self.camType = ""
 
     def setMode(self, mode):
         pass
@@ -56,6 +57,7 @@ class usbCamera(Camera):
         self.framerate = FPS
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, WIDTH)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, HEIGHT)
+        self.camType = "USB"
 
     def setMode(self, mode):
         self.MODE = mode
@@ -90,6 +92,7 @@ class piCamera(Camera, PiCamera):
         self.resolution = (self.WIDTH, self.HEIGHT)
         self.framelate = FPS
         self.led = LED
+        self.camType = "RPi"
         self.stream = io.BytesIO()
         self.stream2 = io.BytesIO()
         time.sleep(2) #initialize

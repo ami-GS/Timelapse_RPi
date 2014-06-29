@@ -54,10 +54,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
     def sendInit(self):
-        if isinstance(self.camera, cameraset.usbCamera):
-            self.write_message("camType:USB")#for client effect radio button
-        else:
-            self.write_message("camType:RPi")
+        self.write_message("camType:%s:%s" % (self.camera.camType, self.camera.MODE))
+        self.write_message("param:%d:%d:" % (self.camera.pro.param1, self.camera.pro.param2))
         global CLIENT
         if len(CLIENT) == 2:
             if CLIENT[1] == self.request.remote_ip:
@@ -93,9 +91,9 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             LENGTH = float(message[1])
             LENGTH = LENGTH*ENCODEFPS
         elif message[0] == "range1":
-            self.camera.pro.setParam(param1=int(message[1]))
+            self.camera.pro.setParam(int(message[1]), self.camera.pro.param2)
         elif message[0] == "range2":
-            self.camera.pro.setParam(param2=int(message[1]))
+            self.camera.pro.setParam(self.camera.pro.param1, int(message[1]))
         elif message[0] == "start":
             if DIRNAME not in os.listdir("./"):
                 print("create directory.... %s" % DIRNAME)

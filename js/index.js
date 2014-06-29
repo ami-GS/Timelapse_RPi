@@ -7,6 +7,7 @@ var canvas2 = document.getElementById("canvas2");
 var context2 = canvas2.getContext("2d");
 var duration = document.getElementById("duration");
 var count;
+var mode = "";
 var effectType = {"USB":['normal', 'edge', 'motion', 'gray'],
                   "RPi":['none', 'sketch', 'posterise', 'gpen', 'colorbalance', 'film',
                       'pastel', 'emboss', 'denoise', 'negative', 'hatch', 'colorswap',
@@ -25,6 +26,8 @@ window.onload = function(){
     context1.textBaseline = "middle";
     context1.fillText("No connection", canvas1.width/2, canvas1.height/2);
     setInfo();
+    document.getElementById("range1").value = 0;
+    document.getElementById("range2").value = 50;
 };
 
 ws.onopen = function(){
@@ -53,16 +56,25 @@ ws.onmessage = function(evt){
             //make synchronize with server
             cntEnd();
         }
-		else if(evt.data.indexOf("camType" != -1)){
-            showEffectButton(effectType[evt.data.slice(-3)]); //extract 'USB' or 'RPi'
+		else if(evt.data.indexOf("camType") != -1){
+            var cam = evt.data.slice(evt.data.indexOf(":")+1);
+            showEffectButton(effectType[cam.slice(0,3)], cam.slice(4)); //extract 'USB' or 'RPi'
 		}
+        else if(evt.data.indexOf("param") != -1){
+            var ran = evt.data.slice(6);
+            for(var i = 1; i < 3; i++){
+                document.getElementById("param"+i).innerHTML = ran.slice(0,ran.indexOf(":"));
+                document.getElementById("range"+i).value = parseInt(ran.slice(0,ran.indexOf(":")));
+                ran = ran.slice(ran.indexOf(":")+1);
+            }
+        }
         //else if(evt.data.indexOf("effect") != -1){
         //    setClicked();//TODO initial setting of clicked button
         //}
     }
 };
 
-function showEffectButton(camTypes){
+function showEffectButton(camTypes, mode){
     var elm;
     var lab;
     var parent = document.getElementById("radioSet");
@@ -70,11 +82,12 @@ function showEffectButton(camTypes){
         elm = document.createElement("input");
         lab = document.createElement("label");
         elm.type = "radio";
-        elm.id = "radio".concat(i.toString());
+        elm.id = camTypes[i];
         elm.name = "mode";
         elm.value = camTypes[i];
         elm.onclick = function(){chmd(this.value);};
         lab.htmlFor = elm.id;
+        if(camTypes[i] == mode){elm.checked = true;}
         lab.appendChild(document.createTextNode(camTypes[i]));
         parent.appendChild(elm);
         parent.appendChild(lab);
