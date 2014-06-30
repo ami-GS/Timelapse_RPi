@@ -26,7 +26,7 @@ Finally, the time lapse video will be created automatically, so you should downl
 
 ### TODO
 * Make it possible to record video from RPi camera module
-*fix bugs that sometimes stop showing after switch image effect
+* fix bugs that sometimes stop showing after switch image effect
 
 # warning
 You cannot record when you use Raspberry pi camera module (there are bugs yet sorry)
