@@ -61,6 +61,15 @@ class usbCamera(Camera):
 
     def setMode(self, mode):
         self.MODE = mode
+        print self.MODE
+        if self.MODE == 'normal':
+            self.pro.getImage = self.pro.normal
+        elif self.MODE == 'edge':
+            self.pro.getImage = self.pro.edgeDetect
+        elif self.MODE == 'gray':
+            self.pro.getImage = self.pro.grayImage
+        elif self.MODE == 'motion':
+            self.pro.getImage = self.pro.motionDetect
 
     def takeImage(self):
         _, img = self.camera.read()
@@ -70,7 +79,8 @@ class usbCamera(Camera):
     def _getFrame(self):
         _, img = self.camera.read()
         if _:
-            img = self.pro.assign(img, self.MODE) # assign each processing
+            #img = self.pro.assign(img, self.MODE) # assign each processing
+            img = self.pro.getImage(img)
             return img
         else:
             return -1

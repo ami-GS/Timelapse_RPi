@@ -6,7 +6,7 @@ class imageProcess():
         self.prev = None
         self.param1 = 100
         self.param2 = 200
-        pass
+        self.getImage = self.normal
 
     def setParam(self, param1=100, param2=200):
         self.param1 = param1
@@ -24,6 +24,13 @@ class imageProcess():
         elif process == "motion":
             img = self.motionDetect(img)
 
+        return img
+
+    def getImage(self, img):
+        pass
+
+    def normal(self, img):
+        self.prev = img
         return img
 
     def edgeDetect(self, img):
