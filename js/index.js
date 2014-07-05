@@ -9,10 +9,10 @@ var duration = document.getElementById("duration");
 var count;
 var mode = "";
 var effectType = {"USB":['normal', 'edge', 'motion', 'gray'],
-                  "RPi":['none', 'sketch', 'posterise', 'gpen', 'colorbalance', 'film',
+                  "RPi":['normal', 'sketch', 'posterise', 'gpen', 'colorbalance', 'film',
                       'pastel', 'emboss', 'denoise', 'negative', 'hatch', 'colorswap',
-                      'colorpoint', 'saturation', 'blur', 'posterise',
-                      'watercolor', 'cartoon', 'solarize', 'oilpaint']};
+                      'colorpoint', 'saturation', 'blur', 'watercolor', 'cartoon',
+                      'solarize', 'oilpaint']};
 var img = new Image();
 var STATE = "";
 var ws = new WebSocket("ws://localhost:8080/camera");

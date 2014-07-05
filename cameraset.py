@@ -111,6 +111,9 @@ class piCamera(Camera, PiCamera):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
 
     def setMode(self, mode):
+        self.MODE = mode
+        if mode == "normal":
+            mode = "none"
         self.image_effect = mode
         self.config = self._configWait
 
