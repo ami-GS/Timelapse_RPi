@@ -15,7 +15,6 @@ var effectType = {"USB":['normal', 'edge', 'motion', 'gray'],
                       'solarize', 'oilpaint']};
 var img = new Image();
 var STATE = "";
-var ws = new WebSocket("ws://localhost:8080/camera");
 ws.binaryType = 'blob';
 
 

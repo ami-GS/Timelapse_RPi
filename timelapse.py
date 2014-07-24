@@ -7,8 +7,11 @@ import makevideo
 import tornado.web, tornado.websocket, tornado.httpserver
 import tornado.ioloop
 from tornado.ioloop import IOLoop, PeriodicCallback
+from jinja2 import Environment, FileSystemLoader
 import json
+import socket
 
+env = Environment(loader=FileSystemLoader('./', encoding='utf8'))
 WIDTH = 480 #2592 # max
 HEIGHT = 360 #1944 # max
 DIRNAME = "TL_%s" % datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -18,15 +21,17 @@ FPS = 0
 LENGTH = 0
 CLIENT = [] #[websocket connection object, ip address which recording]
 RUN = False
-
+PORT = 8080 # here should be change dynamically
+HOST = socket.gethostname() # here also
+if not HOST.count('.local'):
+    HOST += '.local' # for my environment (local)
 
 class HttpHandler(tornado.web.RequestHandler):
     def get(self):
-        with open("index.html", "r") as f:
-            for line in f.readlines():
-                self.write(line)
-        #self.finish() # TODO Here should be appeared after finish recording. -> DONE
-        #self.render("./index.html")
+        tpl = env.get_template('index.html')
+        html = tpl.render({'host':HOST, 'port': PORT})
+        self.write(html.encode('utf-8'))
+        self.finish()
 
 class downloadHandler(tornado.web.RequestHandler):
     def get(self):
@@ -216,7 +221,8 @@ if __name__ == "__main__":
                 (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": "./js/"}),
                 (r"/camera", WSHandler, dict(camera=camera)),
                 ])
-
+    #global HOST
+    #HOST = "localhost"
     http_server = tornado.httpserver.HTTPServer(app)
-    http_server.listen(8080)
+    http_server.listen(PORT)
     IOLoop.instance().start()
