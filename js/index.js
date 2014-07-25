@@ -7,12 +7,6 @@ var canvas2 = document.getElementById("canvas2");
 var context2 = canvas2.getContext("2d");
 var duration = document.getElementById("duration");
 var count;
-var mode = "";
-var effectType = {"USB":['normal', 'edge', 'motion', 'gray'],
-                  "RPi":['normal', 'sketch', 'posterise', 'gpen', 'colorbalance', 'film',
-                      'pastel', 'emboss', 'denoise', 'negative', 'hatch', 'colorswap',
-                      'colorpoint', 'saturation', 'blur', 'watercolor', 'cartoon',
-                      'solarize', 'oilpaint']};
 var img = new Image();
 var STATE = "";
 ws.binaryType = 'blob';
@@ -55,10 +49,6 @@ ws.onmessage = function(evt){
             //make synchronize with server
             cntEnd();
         }
-		else if(evt.data.indexOf("camType") != -1){
-            var cam = evt.data.slice(evt.data.indexOf(":")+1);
-            showEffectButton(effectType[cam.slice(0,3)], cam.slice(4)); //extract 'USB' or 'RPi'
-		}
         else if(evt.data.indexOf("param") != -1){
             var ran = evt.data.slice(6);
             for(var i = 1; i < 3; i++){
@@ -72,26 +62,6 @@ ws.onmessage = function(evt){
         //}
     }
 };
-
-function showEffectButton(camTypes, mode){
-    var elm;
-    var lab;
-    var parent = document.getElementById("radioSet");
-    for(i = 0; i < camTypes.length; i++){
-        elm = document.createElement("input");
-        lab = document.createElement("label");
-        elm.type = "radio";
-        elm.id = camTypes[i];
-        elm.name = "mode";
-        elm.value = camTypes[i];
-        elm.onclick = function(){chmd(this.value);};
-        lab.htmlFor = elm.id;
-        if(camTypes[i] == mode){elm.checked = true;}
-        lab.appendChild(document.createTextNode(camTypes[i]));
-        parent.appendChild(elm);
-        parent.appendChild(lab);
-    }
-}
 
 window.onbeforeunload = function(){
     ws.close(1000); //Is this needed??
