@@ -27,9 +27,13 @@ if not HOST.count('.local'):
     HOST += '.local' # for my environment (local)
 
 class HttpHandler(tornado.web.RequestHandler):
+    def initialize(self, camera):
+        self.effects = camera.getEffects()
+        self.mode = camera.getMode()
+
     def get(self):
         tpl = env.get_template('index.html')
-        html = tpl.render({'host':HOST, 'port': PORT})
+        html = tpl.render({'host':HOST, 'port': PORT, 'effects':self.effects, 'checked':self.effects.index(self.mode)})
         self.write(html.encode('utf-8'))
         self.finish()
 
@@ -216,7 +220,7 @@ if __name__ == "__main__":
     WSHandler.setCameraLoop(camera)
 
     app = tornado.web.Application([
-                (r"/", HttpHandler),
+                (r"/", HttpHandler, dict(camera=camera)),
                 (r"/download", downloadHandler),
                 (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": "./js/"}),
                 (r"/camera", WSHandler, dict(camera=camera)),

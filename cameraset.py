@@ -20,9 +20,17 @@ class Camera(object):
         self.config = self._configPass
         self.MODE = "normal"
         self.camType = ""
+        self.effectType = {"USB":['normal', 'edge', 'motion', 'gray'],
+                           "RPi":['normal', 'sketch', 'posterise', 'gpen', 'colorbalance', 'film',
+                           'pastel', 'emboss', 'denoise', 'negative', 'hatch', 'colorswap',
+                           'colorpoint', 'saturation', 'blur', 'watercolor', 'cartoon',
+                           'solarize', 'oilpaint']}
 
     def setMode(self, mode):
         pass
+
+    def getMode(self):
+        return self.MODE
 
     def takeImage(self):
         pass
@@ -49,6 +57,9 @@ class Camera(object):
         del self.t
         self.t = Thread(target=target, args=args)
         self.t.setDaemon(True)
+
+    def getEffects(self):
+        return self.effectType[self.camType]
 
 class usbCamera(Camera):
     def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360, FPS=25):
