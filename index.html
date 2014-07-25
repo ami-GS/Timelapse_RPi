@@ -19,7 +19,14 @@
 </div>
 <div id="effectDiv">
 <form name="mode" id="radioSet">
-    <!-- here shold be set depend on server side camera type!-->
+    {% for effect in effects %}
+    {% if loop.index0 == checked %}
+    <input type="radio" id="{{ effect }}" name="mode" value="{{ effect }}" onclick="chmd(this.value)" checked="true">
+    {% else %}
+    <input type="radio" id="{{ effect }}" name="mode" value="{{ effect }}" onclick="chmd(this.value)">
+    {% endif %}
+    <label for="{{ effect }}">{{ effect }}</label>
+    {% endfor %}
 </form>
 </div>
 Frames per second : <input type="number" id="fps" value="1.0" step="0.1" min="0" max="8" onchange="setInfo();"><br>
