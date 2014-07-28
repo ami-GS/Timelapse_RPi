@@ -20,6 +20,7 @@ Finally, the time lapse video will be created automatically, so you should downl
   * tornado
   * picamera
   * numpy
+  * jinja2
 - hardware (if possible)
   * Raspberry Pi
   * USB camera or camera module
