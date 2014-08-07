@@ -158,7 +158,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 if not CLIENT:
                     break
         except Exception as e:
-            print "in rloop", e
+            print("in rloop", e)
 
     @staticmethod
     def loop(camera):
@@ -168,7 +168,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 CLIENT[0].write_message(img, binary=True)
                 time.sleep(1.0/camera.framerate)
         except Exception as e:
-            print "in loop", e
+            print("in loop", e)
 
     def on_close(self):
         global CLIENT
@@ -209,7 +209,7 @@ def changejsfile(fname):
                 import socket
                 line = line[:line.index("HOSTNAME")]+socket.gethostbyname(socket.gethostname())+line[line.index("HOSTNAME")+len("HOSTNAME"):]
             jsfile += line
-        print jsfile
+        print(jsfile)
         fr.write(jsfile)
 
 if __name__ == "__main__":

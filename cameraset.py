@@ -72,7 +72,7 @@ class usbCamera(Camera):
 
     def setMode(self, mode):
         self.MODE = mode
-        print self.MODE
+        print(self.MODE)
         if self.MODE == 'normal':
             self.pro.getImage = self.pro.normal
         elif self.MODE == 'edge':
