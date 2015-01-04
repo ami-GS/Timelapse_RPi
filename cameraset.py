@@ -4,18 +4,17 @@ import numpy as np
 from threading import Thread, Event
 from imageprocess import imageProcess
 import io
+import settings as SET
 try:
     from picamera import PiCamera # here cause warning
 except:
     PiCamera = object
 
 class Camera(object):
-    def __init__(self, DIRNAME, ZFILL, WIDTH, HEIGHT):
+    def __init__(self, DIRNAME, FPS = 25):
         self.num = 1
         self.DIRNAME = DIRNAME
-        self.ZFILL = ZFILL
-        self.WIDTH = WIDTH
-        self.HEIGHT = HEIGHT
+        self.framerate = FPS
         self.camera = None
         self.t = None
         self.event = Event()
@@ -39,7 +38,7 @@ class Camera(object):
         pass
 
     def timeStamp(self):
-        stamp = str(self.num).zfill(self.ZFILL)
+        stamp = str(self.num).zfill(SET.ZFILL)
         self.num += 1
         return stamp
 
@@ -65,12 +64,11 @@ class Camera(object):
         return self.effectType[self.camType]
 
 class usbCamera(Camera):
-    def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360, FPS=25):
-        super(usbCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
+    def __init__(self, DIRNAME):
+        super(usbCamera, self).__init__(DIRNAME)
         self.camera = cv2.VideoCapture(0)
-        self.framerate = FPS
-        self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, WIDTH)
-        self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, HEIGHT)
+        self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, SET.WIDTH)
+        self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, SET.HEIGHT)
         self.camType = "USB"
 
     def setMode(self, mode):
@@ -110,11 +108,10 @@ class usbCamera(Camera):
         return img
 
 class piCamera(Camera, PiCamera):
-    def __init__(self, DIRNAME, ZFILL=7, WIDTH=480, HEIGHT=360, FPS=25, LED=False):
-        super(piCamera, self).__init__(DIRNAME, ZFILL, WIDTH, HEIGHT)
+    def __init__(self, DIRNAME, LED=False):
+        super(piCamera, self).__init__(DIRNAME)
         super(Camera, self).__init__()
-        self.resolution = (self.WIDTH, self.HEIGHT)
-        self.framelate = FPS
+        self.resolution = (SET.WIDTH, SET.HEIGHT)
         self.led = LED
         self.camType = "RPi"
         self.stream = io.BytesIO()

@@ -75,13 +75,13 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             CLIENT.append(self.request.remote_ip)
             if isinstance(self.camera, cameraset.usbCamera):
                 self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
-                self.writer = makevideo.makeVideo(DIRNAME, SET.ENCODEFPS, FPS, SET.ZFILL)
+                self.writer = makevideo.makeVideo(DIRNAME, FPS)
                 self.writer.initWriter((SET.WIDTH, SET.HEIGHT))
             elif isinstance(self.camera, cameraset.piCamera):
                 self.LENGTH = LENGTH
                 self.callback = PeriodicCallback(self.takeConsecutiveImages, 1000/FPS)
             self.callback.start()
-            sys.stdout.write("Start recording")
+            sys.stdout.write("Start recording\n")
 
         global FPS, LENGTH
 
@@ -181,7 +181,7 @@ def progressbar(NUM, LENGTH):
     sys.stdout.flush()
 
 def mainLoop(camera, FPS, LENGTH):
-    writer = makevideo.makeVideo(DIRNAME, SET.ENCODEFPS, FPS, SET.ZFILL)
+    writer = makevideo.makeVideo(DIRNAME, FPS)
     while True:
         progressbar(camera.num, LENGTH) # this doesn't work well
         camera.takeImage()
@@ -206,9 +206,9 @@ def changejsfile(fname):
 
 if __name__ == "__main__":
     if cameraset.PiCamera != object:
-        camera = cameraset.piCamera(DIRNAME, SET.ZFILL, SET.WIDTH, SET.HEIGHT)
+        camera = cameraset.piCamera(DIRNAME)
     else:
-        camera = cameraset.usbCamera(DIRNAME, SET.ZFILL, SET.WIDTH, SET.HEIGHT)
+        camera = cameraset.usbCamera(DIRNAME)
     WSHandler.setCameraLoop(camera)
 
     app = tornado.web.Application([
