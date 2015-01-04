@@ -213,9 +213,9 @@ def changejsfile(fname):
         fr.write(jsfile)
 
 if __name__ == "__main__":
-    try:
+    if cameraset.PiCamera != object:
         camera = cameraset.piCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
-    except:
+    else:
         camera = cameraset.usbCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
     WSHandler.setCameraLoop(camera)
 

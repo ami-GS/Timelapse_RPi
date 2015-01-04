@@ -4,7 +4,10 @@ import numpy as np
 from threading import Thread, Event
 from imageprocess import imageProcess
 import io
-from picamera import PiCamera # here cause warning
+try:
+    from picamera import PiCamera # here cause warning
+except:
+    PiCamera = object
 
 class Camera(object):
     def __init__(self, DIRNAME, ZFILL, WIDTH, HEIGHT):
