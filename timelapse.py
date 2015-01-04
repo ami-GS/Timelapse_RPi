@@ -10,21 +10,13 @@ from tornado.ioloop import IOLoop, PeriodicCallback
 from jinja2 import Environment, FileSystemLoader
 import json
 import socket
+import settings as SET
 
 env = Environment(loader=FileSystemLoader('./', encoding='utf8'))
-WIDTH = 480 #2592 # max
-HEIGHT = 360 #1944 # max
 DIRNAME = "TL_%s" % datetime.now().strftime("%Y%m%d-%H%M%S")
-ZFILL = 7
-ENCODEFPS = 25
 FPS = 0
 LENGTH = 0
 CLIENT = [] #[websocket connection object, ip address which recording]
-RUN = False
-PORT = 8080 # here should be change dynamically
-HOST = socket.gethostname() # here also
-if not HOST.count('.local'):
-    HOST += '.local' # for my environment (local)
 
 class HttpHandler(tornado.web.RequestHandler):
     def initialize(self, camera):
@@ -33,7 +25,7 @@ class HttpHandler(tornado.web.RequestHandler):
 
     def get(self):
         tpl = env.get_template('index.html')
-        html = tpl.render({'host':HOST, 'port': PORT, 'effects':self.effects, 'checked':self.effects.index(self.mode)})
+        html = tpl.render({'host':SET.HOST, 'port': SET.PORT, 'effects':self.effects, 'checked':self.effects.index(self.mode)})
         self.write(html.encode('utf-8'))
         self.finish()
 
@@ -83,8 +75,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             CLIENT.append(self.request.remote_ip)
             if isinstance(self.camera, cameraset.usbCamera):
                 self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
-                self.writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, FPS, ZFILL)
-                self.writer.initWriter((WIDTH, HEIGHT))
+                self.writer = makevideo.makeVideo(DIRNAME, SET.ENCODEFPS, FPS, SET.ZFILL)
+                self.writer.initWriter((SET.WIDTH, SET.HEIGHT))
             elif isinstance(self.camera, cameraset.piCamera):
                 self.LENGTH = LENGTH
                 self.callback = PeriodicCallback(self.takeConsecutiveImages, 1000/FPS)
@@ -98,7 +90,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             FPS = float(message[1])
         elif message[0] == "length":
             LENGTH = float(message[1])
-            LENGTH = LENGTH*ENCODEFPS
+            LENGTH = LENGTH*SET.ENCODEFPS
         elif message[0] == "range1":
             self.camera.pro.setParam(int(message[1]), self.camera.pro.param2)
         elif message[0] == "range2":
@@ -189,7 +181,7 @@ def progressbar(NUM, LENGTH):
     sys.stdout.flush()
 
 def mainLoop(camera, FPS, LENGTH):
-    writer = makevideo.makeVideo(DIRNAME, ENCODEFPS, FPS, ZFILL)
+    writer = makevideo.makeVideo(DIRNAME, SET.ENCODEFPS, FPS, SET.ZFILL)
     while True:
         progressbar(camera.num, LENGTH) # this doesn't work well
         camera.takeImage()
@@ -214,9 +206,9 @@ def changejsfile(fname):
 
 if __name__ == "__main__":
     if cameraset.PiCamera != object:
-        camera = cameraset.piCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
+        camera = cameraset.piCamera(DIRNAME, SET.ZFILL, SET.WIDTH, SET.HEIGHT)
     else:
-        camera = cameraset.usbCamera(DIRNAME, ZFILL, WIDTH, HEIGHT)
+        camera = cameraset.usbCamera(DIRNAME, SET.ZFILL, SET.WIDTH, SET.HEIGHT)
     WSHandler.setCameraLoop(camera)
 
     app = tornado.web.Application([
@@ -228,5 +220,5 @@ if __name__ == "__main__":
     #global HOST
     #HOST = "localhost"
     http_server = tornado.httpserver.HTTPServer(app)
-    http_server.listen(PORT)
+    http_server.listen(SET.PORT)
     IOLoop.instance().start()
