@@ -129,7 +129,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.write_message("finish")
 
     @classmethod
-    def setCameraLoop(self, camera):
+    def setCameraLoop(cls, camera):
         if isinstance(camera, cameraset.usbCamera):
             camera.setThread(target=WSHandler.loop, args=(camera,))
         elif isinstance(camera, cameraset.piCamera):
