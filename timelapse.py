@@ -16,7 +16,6 @@ env = Environment(loader=FileSystemLoader('./', encoding='utf8'))
 DIRNAME = "TL_%s" % datetime.now().strftime("%Y%m%d-%H%M%S")
 FPS = 0
 LENGTH = 0
-CLIENT = [] #[websocket connection object, ip address which recording]
 
 class HttpHandler(tornado.web.RequestHandler):
     def initialize(self, camera):
@@ -44,6 +43,7 @@ class downloadHandler(tornado.web.RequestHandler):
         self.finish()
 
 class WSHandler(tornado.websocket.WebSocketHandler):
+    clients = []
     def initialize(self, camera):
         self.camera = camera
 
@@ -57,22 +57,21 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def sendInit(self):
         self.write_message("camType:%s:%s" % (self.camera.camType, self.camera.MODE))
         self.write_message("param:%d:%d:" % (self.camera.pro.param1, self.camera.pro.param2))
-        global CLIENT
-        if len(CLIENT) == 2:
-            if CLIENT[1] == self.request.remote_ip:
-                CLIENT[0] = self
+        if len(self.clients) == 2:
+            if self.clients[1] == self.request.remote_ip:
+                self.clients[0] = self
                 self.write_message("recording")
                 self.write_message("remaining:%f" % (float(LENGTH-self.camera.num)/FPS)) # TODO send remaining time
             else:
                 sys.stdout.write("%s : connection refused" % self.request.remote_ip)
                 self.on_close()
                 return
-        elif len(CLIENT) == 0:
-            CLIENT.append(self)
+        elif len(self.clients) == 0:
+            self.clients.append(self)
 
     def on_message(self, message):
         def run():
-            CLIENT.append(self.request.remote_ip)
+            self.clients.append(self.request.remote_ip)
             if isinstance(self.camera, cameraset.usbCamera):
                 self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
                 self.writer = makevideo.makeVideo(DIRNAME, FPS)
@@ -126,7 +125,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def finishRecording(self):
         sys.stdout.write("finish recording\n")
         self.callback.stop()
-        CLIENT.pop(1) #make state be non-recording
+        self.clients.pop(1) #make state be non-recording
         self.write_message("finish")
 
     @classmethod
@@ -136,40 +135,39 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         elif isinstance(camera, cameraset.piCamera):
             camera.setThread(target=WSHandler.rloop, args=(camera,))
 
-    @staticmethod
-    def rloop(camera):
+    @classmethod
+    def rloop(cls, camera):
         #TODO susbend loop to make stable when change the mode
         try:
             for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
                 camera.config()
                 camera.stream.seek(0)
                 img = camera.stream.read()
-                CLIENT[0].write_message(img, binary=True)
+                cls.clients[0].write_message(img, binary=True)
                 camera.stream.seek(0)
                 camera.stream.truncate()
-                if not CLIENT:
+                if not cls.clients:
                     break
         except Exception as e:
             print("in rloop", e)
 
-    @staticmethod
-    def loop(camera):
+    @classmethod
+    def loop(cls, camera):
         try:
-            while CLIENT:
+            while cls.clients:
                 img = camera.getFrame()
-                CLIENT[0].write_message(img, binary=True)
+                cls.clients[0].write_message(img, binary=True)
                 time.sleep(1.0/camera.framerate)
         except Exception as e:
             print("in loop", e)
 
     def on_close(self):
-        global CLIENT
         #print self.close_reason, self.close_code # TODO try to connect again when RPi stops sending
         #about above, the error occurs in javascript code, and it could not be catch the error.
         print("%s : connection closed" % self.request.remote_ip)
 
-        if len(CLIENT) != 2:
-            CLIENT = []
+        if len(self.clients) != 2:
+            self.clients = []
         else:
             print("Recording is continuing!")
 
