@@ -14,7 +14,7 @@ class Camera(object):
     def __init__(self, DIRNAME, FPS = 25):
         self.num = 1
         self.DIRNAME = DIRNAME
-        self.framerate = FPS
+        self.FPS = FPS
         self.camera = None
         self.t = None
         self.event = Event()
@@ -66,6 +66,7 @@ class Camera(object):
 class usbCamera(Camera):
     def __init__(self, DIRNAME):
         super(usbCamera, self).__init__(DIRNAME)
+        self.framerate = self.FPS
         self.camera = cv2.VideoCapture(0)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, SET.WIDTH)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, SET.HEIGHT)
@@ -111,6 +112,7 @@ class piCamera(Camera, PiCamera):
     def __init__(self, DIRNAME, LED=False):
         super(piCamera, self).__init__(DIRNAME)
         super(Camera, self).__init__()
+        self.framerate = self.FPS
         self.resolution = (SET.WIDTH, SET.HEIGHT)
         self.led = LED
         self.camType = "RPi"
