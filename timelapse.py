@@ -16,6 +16,7 @@ env = Environment(loader=FileSystemLoader('./', encoding='utf8'))
 DIRNAME = "TL_%s" % datetime.now().strftime("%Y%m%d-%H%M%S")
 FPS = 0
 LENGTH = 0
+clients = []
 
 class HttpHandler(tornado.web.RequestHandler):
     def initialize(self, camera):
@@ -43,13 +44,12 @@ class downloadHandler(tornado.web.RequestHandler):
         self.finish()
 
 class WSHandler(tornado.websocket.WebSocketHandler):
-    clients = []
     def initialize(self, camera):
         self.camera = camera
 
     def open(self):
         self.sendInit()
-        self.setCameraLoop(self.camera)
+        setCameraLoop(self.camera)
         self.camera.t.start()
         self.callback = None
         sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
@@ -57,21 +57,22 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def sendInit(self):
         self.write_message("camType:%s:%s" % (self.camera.camType, self.camera.MODE))
         self.write_message("param:%d:%d:" % (self.camera.pro.param1, self.camera.pro.param2))
-        if len(self.clients) == 2:
-            if self.clients[1] == self.request.remote_ip:
-                self.clients[0] = self
+        global clients
+        if len(clients) == 2:
+            if clients[1] == self.request.remote_ip:
+                clients[0] = self
                 self.write_message("recording")
                 self.write_message("remaining:%f" % (float(LENGTH-self.camera.num)/FPS)) # TODO send remaining time
             else:
                 sys.stdout.write("%s : connection refused" % self.request.remote_ip)
                 self.on_close()
                 return
-        elif len(self.clients) == 0:
-            self.clients.append(self)
+        elif len(clients) == 0:
+            clients.append(self)
 
     def on_message(self, message):
         def run():
-            self.clients.append(self.request.remote_ip)
+            clients.append(self.request.remote_ip)
             if isinstance(self.camera, cameraset.usbCamera):
                 self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
                 self.writer = makevideo.makeVideo(DIRNAME, FPS)
@@ -125,51 +126,49 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def finishRecording(self):
         sys.stdout.write("finish recording\n")
         self.callback.stop()
-        self.clients.pop(1) #make state be non-recording
+        clients.pop(1) #make state be non-recording
         self.write_message("finish")
-
-    @classmethod
-    def setCameraLoop(cls, camera):
-        if isinstance(camera, cameraset.usbCamera):
-            camera.setThread(target=WSHandler.loop, args=(camera,))
-        elif isinstance(camera, cameraset.piCamera):
-            camera.setThread(target=WSHandler.rloop, args=(camera,))
-
-    @classmethod
-    def rloop(cls, camera):
-        #TODO susbend loop to make stable when change the mode
-        try:
-            for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
-                camera.config()
-                camera.stream.seek(0)
-                img = camera.stream.read()
-                cls.clients[0].write_message(img, binary=True)
-                camera.stream.seek(0)
-                camera.stream.truncate()
-                if not cls.clients:
-                    break
-        except Exception as e:
-            print("in rloop", e)
-
-    @classmethod
-    def loop(cls, camera):
-        try:
-            while cls.clients:
-                img = camera.getFrame()
-                cls.clients[0].write_message(img, binary=True)
-                time.sleep(1.0/camera.framerate)
-        except Exception as e:
-            print("in loop", e)
 
     def on_close(self):
         #print self.close_reason, self.close_code # TODO try to connect again when RPi stops sending
         #about above, the error occurs in javascript code, and it could not be catch the error.
         print("%s : connection closed" % self.request.remote_ip)
-
-        if len(self.clients) != 2:
-            self.clients = []
+        global clients
+        if len(clients) != 2:
+            clients = []
         else:
             print("Recording is continuing!")
+
+def setCameraLoop(camera):
+    if isinstance(camera, cameraset.usbCamera):
+        camera.setThread(target=loop, args=(camera,))
+    elif isinstance(camera, cameraset.piCamera):
+        camera.setThread(target=rloop, args=(camera,))
+
+def rloop(camera):
+    #TODO susbend loop to make stable when change the mode
+    try:
+        for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
+            camera.config()
+            camera.stream.seek(0)
+            img = camera.stream.read()
+            clients[0].write_message(img, binary=True)
+            camera.stream.seek(0)
+            camera.stream.truncate()
+            if not clients:
+                break
+    except Exception as e:
+        print("in rloop", e)
+
+
+def loop(camera):
+    try:
+        while clients:
+            img = camera.getFrame()
+            clients[0].write_message(img, binary=True)
+            time.sleep(1.0/camera.framerate)
+    except Exception as e:
+        print("in loop", e)
 
 def progressbar(NUM, LENGTH):
     out = "["
@@ -207,7 +206,7 @@ if __name__ == "__main__":
         camera = cameraset.piCamera(DIRNAME)
     else:
         camera = cameraset.usbCamera(DIRNAME)
-    WSHandler.setCameraLoop(camera)
+    setCameraLoop(camera)
 
     app = tornado.web.Application([
                 (r"/", HttpHandler, dict(camera=camera)),
