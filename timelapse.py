@@ -11,6 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 import json
 import socket
 import settings as SET
+import sensor
 
 env = Environment(loader=FileSystemLoader('./', encoding='utf8'))
 DIRNAME = "TL_%s" % datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -47,15 +48,20 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def initialize(self, camera):
         self.camera = camera
 
+    def sendInfo(self):
+        self.write_message("temperature:%s" % sensor.getCPUtemp())
+
     def open(self):
         self.sendInit()
         setCameraLoop(self.camera)
         self.camera.t.start()
+        self.periodicSender = PeriodicCallback(self.sendInfo, 1000)
+        self.periodicSender.start()
         self.callback = None
         sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
     def sendInit(self):
-        self.write_message("camType:%s:%s" % (self.camera.camType, self.camera.MODE))
+        #self.write_message("camType:%s:%s" % (self.camera.camType, self.camera.MODE))
         self.write_message("param:%d:%d:" % (self.camera.pro.param1, self.camera.pro.param2))
         global clients
         if len(clients) == 2:
@@ -133,6 +139,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         #print self.close_reason, self.close_code # TODO try to connect again when RPi stops sending
         #about above, the error occurs in javascript code, and it could not be catch the error.
         print("%s : connection closed" % self.request.remote_ip)
+        self.periodicSender.stop()
         global clients
         if len(clients) != 2:
             clients = []
