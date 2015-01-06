@@ -9,6 +9,7 @@ var duration = document.getElementById("duration");
 var count;
 var img = new Image();
 var STATE = "";
+var frameColor = "white";
 ws.binaryType = 'blob';
 
 
@@ -39,7 +40,8 @@ ws.onmessage = function(evt){
         if(evt.data == "recording"){
             console.log("now recording");
             STATE = "recording";
-            drawRec();
+			frameColor = "rgb(255,0,0)";
+            drawFrame();
         }
         else if(evt.data.indexOf("remaining") != -1){
             count = Number(evt.data.slice(10,evt.data.indexOf(".")+1)); //TODO receive remaining time
@@ -56,7 +58,9 @@ ws.onmessage = function(evt){
                 document.getElementById("range"+i).value = parseInt(ran.slice(0,ran.indexOf(":")));
                 ran = ran.slice(ran.indexOf(":")+1);
             }
-        }
+        } else if(evt.data.indexOf("temperature") != -1) {
+			drawTemp(evt.data.slice(12));
+		}
         //else if(evt.data.indexOf("effect") != -1){
         //    setClicked();//TODO initial setting of clicked button
         //}
@@ -68,10 +72,16 @@ window.onbeforeunload = function(){
     clearInterval(timer);
 };
 
-function drawRec(){
+function drawFrame(){
     context1.lineWidth = 20;
-    context1.strokeStyle = "rgb(255,0,0)";
+	context1.strokeStyle = frameColor;
     context1.strokeRect(0, 0, canvas1.width, canvas1.height);
+	if (STATE == "recording") {
+		drawRec();
+	}
+}
+
+function drawRec(){
     context1.fillStyle = "black";
     context1.font = "5px 'Arial'";
     context1.textAlign = "start";
@@ -79,11 +89,22 @@ function drawRec(){
     context1.fillText("REC", 20, 0, 200);
 }
 
+function drawTemp(data){
+	drawFrame();
+    context1.fillStyle = "black";
+    context1.font = "5px Arial";
+    context1.textAlign = "start";
+    context1.textBaseline = "top";
+    context1.fillText(data, canvas1.width-40, 0);
+}
+
 function removeRec(){context1.clearRect(0,0,canvas1.width, canvas1.height);}
 
 function startTimeLapse() {
+	STATE = "recording";
+	frameColor = "rgb(255,0,0)";
     cntStart();
-    drawRec();
+    drawFrame();
     document.getElementById("start").disabled = true;
     var fps = document.getElementById("fps").value;
     var length = document.getElementById("len").value;
@@ -109,6 +130,7 @@ function cntDown(){
 
 function cntEnd(){
     STATE = "";
+	frameColor = "white";
     removeRec();
     duration.innerHTML = "Finish recording";
     clearInterval(timer);
