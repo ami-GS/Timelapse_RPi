@@ -6,7 +6,7 @@ import settings as SET
 
 FOURCC = cv2.cv.CV_FOURCC("m","p","4","v")
 
-class makeVideo():
+class MakeVideo():
     def __init__(self, DIRNAME, FPS):
         self.DIRNAME = DIRNAME
         self.FPS = FPS
