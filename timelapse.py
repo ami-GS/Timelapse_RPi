@@ -156,6 +156,7 @@ def rloop(camera):
     #TODO susbend loop to make stable when change the mode
     try:
         for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
+            time.sleep(camera.sleep)
             camera.config()
             camera.stream.seek(0)
             img = camera.stream.read()
@@ -171,6 +172,7 @@ def rloop(camera):
 def loop(camera):
     try:
         while clients:
+            time.sleep(camera.sleep)
             img = camera.getFrame()
             clients[0].write_message(img, binary=True)
             time.sleep(1.0/camera.framerate)
