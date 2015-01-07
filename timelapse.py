@@ -81,7 +81,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             clients.append(self.request.remote_ip)
             if isinstance(self.camera, cameraset.usbCamera):
                 self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
-                self.writer = makevideo.makeVideo(DIRNAME, FPS)
+                self.writer = makevideo.MakeVideo(DIRNAME, FPS)
                 self.writer.initWriter((SET.WIDTH, SET.HEIGHT))
             elif isinstance(self.camera, cameraset.piCamera):
                 self.LENGTH = LENGTH
@@ -185,7 +185,7 @@ def progressbar(NUM, LENGTH):
     sys.stdout.flush()
 
 def mainLoop(camera, FPS, LENGTH):
-    writer = makevideo.makeVideo(DIRNAME, FPS)
+    writer = makevideo.MakeVideo(DIRNAME, FPS)
     while True:
         progressbar(camera.num, LENGTH) # this doesn't work well
         camera.takeImage()
