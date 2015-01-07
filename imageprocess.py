@@ -1,7 +1,7 @@
 import cv2
 
 
-class imageProcess():
+class ImageProcess():
     def __init__(self):
         self.prev = None
         self.param1 = 100

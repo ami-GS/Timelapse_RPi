@@ -2,7 +2,7 @@ import time
 import cv2
 import numpy as np
 from threading import Thread, Event
-from imageprocess import imageProcess
+from imageprocess import ImageProcess
 import io
 import settings as SET
 try:
@@ -18,7 +18,7 @@ class Camera(object):
         self.camera = None
         self.t = None
         self.event = Event()
-        self.pro = imageProcess()
+        self.pro = ImageProcess()
         self.config = self._configPass
         self.MODE = "normal"
         self.camType = ""
