@@ -160,7 +160,8 @@ def rloop(camera):
             camera.config()
             camera.stream.seek(0)
             img = camera.stream.read()
-            clients[0].write_message(img, binary=True)
+            if clients:
+                clients[0].write_message(img, binary=True)
             camera.stream.seek(0)
             camera.stream.truncate()
             if not clients:
@@ -174,7 +175,8 @@ def loop(camera):
         while clients:
             time.sleep(camera.sleep)
             img = camera.getFrame()
-            clients[0].write_message(img, binary=True)
+            if clients:
+                clients[0].write_message(img, binary=True)
             time.sleep(1.0/camera.framerate)
     except Exception as e:
         print("in loop", e)
