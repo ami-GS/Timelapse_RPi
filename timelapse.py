@@ -158,8 +158,7 @@ def rloop(camera):
         for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
             time.sleep(camera.sleep)
             camera.config()
-            camera.stream.seek(0)
-            img = camera.stream.read()
+            img = camera.getFrame()
             if clients:
                 clients[0].write_message(img, binary=True)
             camera.stream.seek(0)

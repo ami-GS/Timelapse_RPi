@@ -5,6 +5,7 @@ from threading import Thread, Event
 from imageprocess import ImageProcess
 import io
 import settings as SET
+import light
 try:
     from picamera import PiCamera # here cause warning
 except:
@@ -112,12 +113,13 @@ class usbCamera(Camera):
         return img
 
 class piCamera(Camera, PiCamera):
-    def __init__(self, DIRNAME, LED=False):
+    def __init__(self, DIRNAME, camLED=False):
         super(piCamera, self).__init__(DIRNAME)
         super(Camera, self).__init__()
         self.framerate = self.FPS
         self.resolution = (SET.WIDTH, SET.HEIGHT)
-        self.led = LED
+        self.led = camLED
+        self.leds = light.LEDs([12])
         self.camType = "RPi"
         self.stream = io.BytesIO()
         self.stream2 = io.BytesIO()
@@ -125,6 +127,13 @@ class piCamera(Camera, PiCamera):
 
     def takeImage(self):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
+
+    def getFrame(self):
+        self.leds.on()
+        self.stream.seek(0)
+        img = self.stream.read()
+        self.leds.off()
+        return img
 
     def setMode(self, mode):
         super(piCamera, self).setMode(mode)
