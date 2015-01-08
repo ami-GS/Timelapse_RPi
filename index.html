@@ -36,7 +36,10 @@ Video length : <input type="number" id="len" value="2.0" step="0.5" max="50" min
 <div id="duration"></div>
 <input id="download" type="button" onclick=window.open("/download") value="download" disabled="disabled">
 <script>
-    var ws = new WebSocket("ws://{{ host }}:{{ port }}/camera");
+  function wsConnect() {
+    ws = new WebSocket("ws://{{ host }}:{{ port }}/camera");
+	wsSetting();
+  }
 </script>
 <script type="text/javascript" src="js/index.js"></script>
 </div>

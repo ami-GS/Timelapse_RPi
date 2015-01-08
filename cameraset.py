@@ -17,6 +17,7 @@ class Camera(object):
         self.FPS = FPS
         self.camera = None
         self.t = None
+        self.sleep = 0
         self.event = Event()
         self.pro = ImageProcess()
         self.config = self._configPass
@@ -29,7 +30,9 @@ class Camera(object):
                            'solarize', 'oilpaint']}
 
     def setMode(self, mode):
-        pass
+        self.sleep = 0.5
+        self.MODE = mode
+        print(self.MODE)
 
     def getMode(self):
         return self.MODE
@@ -73,8 +76,7 @@ class usbCamera(Camera):
         self.camType = "USB"
 
     def setMode(self, mode):
-        self.MODE = mode
-        print(self.MODE)
+        super(usbCamera, self).setMode(mode)
         if self.MODE == 'normal':
             self.pro.getImage = self.pro.normal
         elif self.MODE == 'edge':
@@ -83,6 +85,7 @@ class usbCamera(Camera):
             self.pro.getImage = self.pro.grayImage
         elif self.MODE == 'motion':
             self.pro.getImage = self.pro.motionDetect
+        self.sleep = 0
 
     def takeImage(self):
         _, img = self.camera.read()
@@ -124,11 +127,12 @@ class piCamera(Camera, PiCamera):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
 
     def setMode(self, mode):
-        self.MODE = mode
+        super(piCamera, self).setMode(mode)
         if mode == "normal":
             mode = "none"
         self.image_effect = mode
         self.config = self._configWait
+        self.sleep = 0
 
     def getVideoFrame(self):
         self.capture(self.stream2, format="jpeg") #this have error

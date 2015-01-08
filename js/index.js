@@ -10,10 +10,11 @@ var count;
 var img = new Image();
 var STATE = "";
 var frameColor = "white";
-ws.binaryType = 'blob';
 
 
 window.onload = function(){
+	wsConnect();
+	reconnect();
     context1.fillStyle = "blue";
     context1.font = "bold 20px Arial";
     context1.textAlign = "center";
@@ -24,12 +25,11 @@ window.onload = function(){
     document.getElementById("range2").value = 50;
 };
 
+function wsSetting() {
+ws.binaryType = 'blob';
+
 ws.onopen = function(){
     console.log("connection was established");
-};
-
-img.onload = function(){
-    context2.drawImage(img,0,0);
 };
 
 ws.onmessage = function(evt){
@@ -66,6 +66,25 @@ ws.onmessage = function(evt){
         //}
     }
 };
+
+ws.onerror = function(evt){
+	wsConnect();
+};
+
+}
+
+function reconnect() {
+	if (ws.readyState == 3) {
+		wsConnect();
+	}
+	window.setTimeout("reconnect()", 1000);
+}
+
+
+img.onload = function(){
+    context2.drawImage(img,0,0);
+};
+
 
 window.onbeforeunload = function(){
     ws.close(1000); //Is this needed??
