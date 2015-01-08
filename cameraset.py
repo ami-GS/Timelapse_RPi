@@ -127,7 +127,7 @@ class piCamera(Camera, PiCamera):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
 
     def setMode(self, mode):
-        super(usbCamera, self).setMode(mode)
+        super(piCamera, self).setMode(mode)
         if mode == "normal":
             mode = "none"
         self.image_effect = mode
