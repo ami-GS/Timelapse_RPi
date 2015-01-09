@@ -26,7 +26,8 @@ class HttpHandler(tornado.web.RequestHandler):
 
     def get(self):
         tpl = env.get_template('index.html')
-        html = tpl.render({'host':SET.HOST, 'port': SET.PORT, 'effects':self.effects, 'checked':self.effects.index(self.mode)})
+        html = tpl.render({'host':SET.HOST, 'port': SET.PORT, 'effects':self.effects,
+                           'checked':self.effects.index(self.mode), "LED": "ON" if camera.ledState else "OFF"})
         self.write(html.encode('utf-8'))
         self.finish()
 
@@ -97,6 +98,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         elif message[0] == "length":
             LENGTH = float(message[1])
             LENGTH = LENGTH*SET.ENCODEFPS
+        elif message[0] == "LED":
+            camera.ledState = not camera.ledState
         elif message[0] == "range1":
             self.camera.pro.setParam(int(message[1]), self.camera.pro.param2)
         elif message[0] == "range2":
