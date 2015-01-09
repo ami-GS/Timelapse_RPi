@@ -17,5 +17,6 @@ class LEDs():
         GPIO.output(self.chan_list, GPIO.LOW)
 
     def fin(self):
+        self.off()
         GPIO.cleanup(self.chan_list)
 
