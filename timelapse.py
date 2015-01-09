@@ -231,4 +231,7 @@ if __name__ == "__main__":
     #HOST = "localhost"
     http_server = tornado.httpserver.HTTPServer(app)
     http_server.listen(SET.PORT)
-    IOLoop.instance().start()
+    try:
+        IOLoop.instance().start()
+    except:
+        camera.leds.fin()
