@@ -74,7 +74,7 @@ ws.onerror = function(evt){
 }
 
 function reconnect() {
-	if (ws.readyState == 3) {
+	if (ws.readyState >= 2) {
 		wsConnect();
 	}
 	window.setTimeout("reconnect()", 1000);
@@ -189,4 +189,13 @@ function chParam(slider){
 
 function chmd(radio){
     ws.send('[\"'+radio+'\"]');
+}
+
+function toggleLED(btn) {
+	if (btn.value == "light ON") {
+		btn.value = "light OFF";
+	} else {
+		btn.value = "light ON";
+	}
+	ws.send('[\"LED\"]');
 }
