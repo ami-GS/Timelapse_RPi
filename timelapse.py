@@ -99,7 +99,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
             LENGTH = float(message[1])
             LENGTH = LENGTH*SET.ENCODEFPS
         elif message[0] == "LED":
-            camera.ledState = not camera.ledState
+            camera.toggleLED()
         elif message[0] == "range1":
             self.camera.pro.setParam(int(message[1]), self.camera.pro.param2)
         elif message[0] == "range2":

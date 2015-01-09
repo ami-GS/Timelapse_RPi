@@ -60,6 +60,14 @@ class Camera(object):
     def getFrame(self):
         pass
 
+    def toggleLED(self):
+        if self.ledState:
+            self.leds.off()
+            self.ledState = False
+        else:
+            self.leds.on()
+            self.ledState = True
+
     def setThread(self, target, args):
         del self.t
         self.t = Thread(target=target, args=args)
@@ -131,10 +139,10 @@ class piCamera(Camera, PiCamera):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
 
     def getFrame(self):
-        self.leds.on()
+        #self.leds.on()
         self.stream.seek(0)
         img = self.stream.read()
-        self.leds.off()
+        #self.leds.off()
         return img
 
     def setMode(self, mode):
