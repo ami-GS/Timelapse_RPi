@@ -2,6 +2,7 @@ import time
 import cv2
 import numpy as np
 from threading import Thread, Event
+import platform
 from imageprocess import ImageProcess
 import io
 import settings as SET
@@ -113,13 +114,14 @@ class usbCamera(Camera):
         return img
 
 class piCamera(Camera, PiCamera):
-    def __init__(self, DIRNAME, camLED=False):
+    def __init__(self, DIRNAME, LEDnum = [3, 5, 7],camLED=False):
         super(piCamera, self).__init__(DIRNAME)
         super(Camera, self).__init__()
         self.framerate = self.FPS
         self.resolution = (SET.WIDTH, SET.HEIGHT)
         self.led = camLED
-        self.leds = light.LEDs([12])
+        self.leds = light.LEDs(LEDnum)
+        self.ledState = False
         self.camType = "RPi"
         self.stream = io.BytesIO()
         self.stream2 = io.BytesIO()
