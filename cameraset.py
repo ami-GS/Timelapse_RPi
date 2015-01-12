@@ -27,6 +27,7 @@ class Camera(object):
         self.event = Event()
         self.pro = ImageProcess()
         self.config = self._configPass
+        self.latestImg = None
         self.MODE = "normal"
         self.camType = ""
         self.effectType = {"USB":['normal', 'edge', 'motion', 'gray'],
@@ -117,14 +118,14 @@ class usbCamera(Camera):
             return -1
 
     def getFrame(self):
-        img = self._getFrame()
-        encimg = cv2.imencode(".jpg", img)[1]
+        encimg = cv2.imencode(".jpg", self.latestImg)[1]
         return np.array(encimg).tostring()
-#       return np.array(cv2.imencode(".jpg", img)[1]).tostring()
+
+    def takePic(self):
+        self.latestImg = self._getFrame()
 
     def getVideoFrame(self):
-        img = self._getFrame()
-        return img
+        return self.latestImg
 
 class piCamera(Camera, PiCamera):
     def __init__(self, DIRNAME, LEDnum = [3, 5, 7],camLED=False):
@@ -141,12 +142,15 @@ class piCamera(Camera, PiCamera):
     def takeImage(self):
         self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
 
-    def getFrame(self):
+    def takePic(self):
         #self.leds.on()
         self.stream.seek(0)
         img = self.stream.read()
         #self.leds.off()
-        return img
+        self.latestImg = img
+
+    def getFrame(self):
+        return self.latestImg
 
     def setMode(self, mode):
         super(piCamera, self).setMode(mode)
