@@ -165,9 +165,9 @@ def rloop(camera):
         for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
             time.sleep(camera.sleep)
             camera.config()
-            self.takePic()
-            if clients[0].ws_connection:
-                clients[0].write_message(self.getFrame(), binary=True)
+            camera.takePic()
+            if clients and clients[0].ws_connection:
+                clients[0].write_message(camera.getFrame(), binary=True)
             camera.stream.seek(0)
             camera.stream.truncate()
             if not clients:
@@ -181,7 +181,7 @@ def loop(camera):
         while clients:
             time.sleep(camera.sleep)
             camera.takePic()
-            if clients[0].ws_connection:
+            if clients and clients[0].ws_connection:
                 clients[0].write_message(camera.getFrame(), binary=True)
             time.sleep(1.0/camera.framerate)
     except Exception as e:
