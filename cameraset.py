@@ -6,17 +6,21 @@ import platform
 from imageprocess import ImageProcess
 import io
 import settings as SET
-import light
 try:
     from picamera import PiCamera # here cause warning
+    import light
 except:
     PiCamera = object
+    light = None
 
 class Camera(object):
-    def __init__(self, DIRNAME, FPS = 25):
+    def __init__(self, DIRNAME, LEDnum, FPS = 25):
         self.num = 1
         self.DIRNAME = DIRNAME
         self.FPS = FPS
+        if light:
+            self.leds = light.LEDs(LEDnum)
+        self.ledState = False
         self.camera = None
         self.t = None
         self.sleep = 0
@@ -61,12 +65,13 @@ class Camera(object):
         pass
 
     def toggleLED(self):
-        if self.ledState:
-            self.leds.off()
-            self.ledState = False
-        else:
-            self.leds.on()
-            self.ledState = True
+        if light:
+            if self.ledState:
+                self.leds.off()
+                self.ledState = False
+            else:
+                self.leds.on()
+                self.ledState = True
 
     def setThread(self, target, args):
         del self.t
@@ -77,8 +82,8 @@ class Camera(object):
         return self.effectType[self.camType]
 
 class usbCamera(Camera):
-    def __init__(self, DIRNAME):
-        super(usbCamera, self).__init__(DIRNAME)
+    def __init__(self, DIRNAME, LEDnum = [3, 5, 7]):
+        super(usbCamera, self).__init__(DIRNAME, LEDnum)
         self.framerate = self.FPS
         self.camera = cv2.VideoCapture(0)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, SET.WIDTH)
@@ -123,13 +128,11 @@ class usbCamera(Camera):
 
 class piCamera(Camera, PiCamera):
     def __init__(self, DIRNAME, LEDnum = [3, 5, 7],camLED=False):
-        super(piCamera, self).__init__(DIRNAME)
+        super(piCamera, self).__init__(DIRNAME, LEDnum)
         super(Camera, self).__init__()
         self.framerate = self.FPS
         self.resolution = (SET.WIDTH, SET.HEIGHT)
         self.led = camLED
-        self.leds = light.LEDs(LEDnum)
-        self.ledState = False
         self.camType = "RPi"
         self.stream = io.BytesIO()
         self.stream2 = io.BytesIO()
