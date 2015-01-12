@@ -127,9 +127,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 self.writer.ffmpeg()
 
     def videoWriter(self):
-        img = self.camera.getVideoFrame()
         self.camera.num += 1
-        self.writer.write(img)
+        self.writer.write(self.camera.getVideoFrame())
         if self.camera.num > LENGTH:
             self.finishRecording()
             #self.camera.terminate()
@@ -164,9 +163,9 @@ def rloop(camera):
         for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
             time.sleep(camera.sleep)
             camera.config()
-            img = camera.getFrame()
-            if clients:
-                clients[0].write_message(img, binary=True)
+            self.takePic()
+            if clients[0].ws_connection:
+                clients[0].write_message(self.getFrame(), binary=True)
             camera.stream.seek(0)
             camera.stream.truncate()
             if not clients:
@@ -179,9 +178,9 @@ def loop(camera):
     try:
         while clients:
             time.sleep(camera.sleep)
-            img = camera.getFrame()
-            if clients:
-                clients[0].write_message(img, binary=True)
+            camera.takePic()
+            if clients[0].ws_connection:
+                clients[0].write_message(camera.getFrame(), binary=True)
             time.sleep(1.0/camera.framerate)
     except Exception as e:
         print("in loop", e)
