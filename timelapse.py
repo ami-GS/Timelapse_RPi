@@ -74,7 +74,10 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 sys.stdout.write("%s : connection refused" % self.request.remote_ip)
                 self.on_close()
                 return
-        elif len(clients) == 0:
+        elif len(clients) == 1:
+            #when open connection after finish recording
+            clients[0] = self
+        elif len(clients) == 0 :
             clients.append(self)
 
     def on_message(self, message):
