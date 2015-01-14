@@ -36,6 +36,10 @@ class Camera(object):
                            'colorpoint', 'saturation', 'blur', 'watercolor', 'cartoon',
                            'solarize', 'oilpaint']}
 
+    def init(self):
+        if light:
+            self.leds.init()
+
     def setMode(self, mode):
         self.sleep = 0.5
         self.MODE = mode

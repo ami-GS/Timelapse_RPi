@@ -6,6 +6,9 @@ class LEDs():
         if chan_list:
             self.setChannels(chan_list)
 
+    def init(self):
+        self.__init__(self.chan_list)
+
     def setChannels(self, chan_list):
         self.chan_list = chan_list
         GPIO.setup(chan_list, GPIO.OUT)
