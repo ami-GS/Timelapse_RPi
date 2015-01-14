@@ -11,7 +11,8 @@ class LEDs():
 
     def setChannels(self, chan_list):
         self.chan_list = chan_list
-        GPIO.setup(chan_list, GPIO.OUT)
+        GPIO.cleanup(self.chan_list)
+        GPIO.setup(self.chan_list, GPIO.OUT)
 
     def on(self):
         GPIO.output(self.chan_list, GPIO.HIGH)
