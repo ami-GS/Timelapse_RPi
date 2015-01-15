@@ -146,8 +146,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         #print self.close_reason, self.close_code # TODO try to connect again when RPi stops sending
         #about above, the error occurs in javascript code, and it could not be catch the error.
-        self.close()
         print("%s : connection closed" % self.request.remote_ip)
+        self.close()
         self.periodicSender.stop()
         global clients
         if len(clients) != 2:
