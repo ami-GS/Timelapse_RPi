@@ -53,12 +53,12 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.write_message("temperature:%s" % sensor.getCPUtemp())
 
     def open(self):
+        self.periodicSender = PeriodicCallback(self.sendInfo, 1000)
+        self.periodicSender.start()
         self.sendInit()
         setCameraLoop(self.camera)
         self.camera.t.start()
         self.camera.init()
-        self.periodicSender = PeriodicCallback(self.sendInfo, 1000)
-        self.periodicSender.start()
         self.callback = None
         sys.stdout.write("%s : connection opened\n" % self.request.remote_ip)
 
