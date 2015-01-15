@@ -77,7 +77,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 return
         elif len(clients) == 1:
             #when open connection after finish recording
-            clients[0] = self
+            clients[0].on_close()
+            clients.append(self)
         elif len(clients) == 0 :
             clients.append(self)
 
