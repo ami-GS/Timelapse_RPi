@@ -10,6 +10,7 @@ var count;
 var img = new Image();
 var STATE = "";
 var frameColor = "white";
+var time = 0;
 
 
 window.onload = function(){
@@ -35,6 +36,8 @@ ws.onopen = function(){
 ws.onmessage = function(evt){
     if(evt.data.size > 100){
         img.src = URL.createObjectURL(evt.data);
+		var now = new Date();
+		time = now.getTime();
     }
     else{
         if(evt.data == "recording"){
@@ -74,7 +77,8 @@ ws.onerror = function(evt){
 }
 
 function reconnect() {
-	if (ws.readyState >= 2) {
+	lTime = new Date();
+	if (ws.readyState >= 2 || lTime - time > 1000) {
 		wsConnect();
 	}
 	window.setTimeout("reconnect()", 1000);
