@@ -53,7 +53,6 @@ class Camera(object):
 
     def timeStamp(self):
         stamp = str(self.num).zfill(SET.ZFILL)
-        self.num += 1
         return stamp
 
     def _configPass(self):
