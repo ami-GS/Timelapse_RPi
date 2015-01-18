@@ -165,7 +165,7 @@ function cntEnd(){
 function setInfo(){
     if(STATE == "recording"){
         document.getElementById("start").disabled = true;
-        cntStart()
+        //cntStart() //not good when reconnect() do reconnection
     }
     else{
         var fps = parseFloat(document.getElementById("fps").value);
