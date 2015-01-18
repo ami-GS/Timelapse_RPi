@@ -144,7 +144,9 @@ class piCamera(Camera, PiCamera):
         time.sleep(2) #initialize
 
     def takeImage(self):
-        self.capture("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()))
+        data = np.fromstring(self.latestImg, dtype=np.uint8)
+        image = cv2.imdecode(data, 1)
+        cv2.imwrite("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()), image)
 
     def takePic(self):
         #self.leds.on()

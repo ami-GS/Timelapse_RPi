@@ -85,12 +85,11 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         def run():
             clients.append(self.request.remote_ip)
+            self.writer = makevideo.MakeVideo(DIRNAME, FPS)
             if isinstance(self.camera, cameraset.usbCamera):
                 self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
-                self.writer = makevideo.MakeVideo(DIRNAME, FPS)
                 self.writer.initWriter((SET.WIDTH, SET.HEIGHT))
             elif isinstance(self.camera, cameraset.piCamera):
-                self.LENGTH = LENGTH
                 self.callback = PeriodicCallback(self.takeConsecutiveImages, 1000/FPS)
             self.callback.start()
             sys.stdout.write("Start recording\n")
