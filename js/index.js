@@ -80,7 +80,6 @@ ws.onerror = function(evt){
 function reconnect() {
 	lTime = new Date();
 	if (ws.readyState >= 2 || lTime - currentTime > 1000) {
-		alert("reconnect!");
 		wsConnect();
 	}
 	window.setTimeout("reconnect()", 1000);
