@@ -26,4 +26,4 @@ Finally, the time lapse video will be created automatically (manually type [Y] i
   * USB camera or camera module
 
 ### Image
-![Alt Text](https://github.com/ami-GS/Timelapse_RPi/image/P1000764.JPG)
+![alt tag](https://raw.github.com/ami-GS/Timelapse_RPi/master/image/P1000764.JPG)
