@@ -30,3 +30,6 @@ Finally, the time lapse video will be created automatically (manually type [Y] i
 
 ### Image
 ![alt tag](https://raw.github.com/ami-GS/Timelapse_RPi/master/image/P1000764.JPG)
+
+#### License
+The MIT License (MIT) Copyright (c) 2015 ami-GS
