@@ -25,5 +25,8 @@ Finally, the time lapse video will be created automatically (manually type [Y] i
   * Raspberry Pi
   * USB camera or camera module
 
+### Sequence diagram
+![alt tag](https://raw.github.com/ami-GS/Timelapse_RPi/master/image/sequence.png)
+
 ### Image
 ![alt tag](https://raw.github.com/ami-GS/Timelapse_RPi/master/image/P1000764.JPG)
