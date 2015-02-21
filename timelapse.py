@@ -25,7 +25,7 @@ class HttpHandler(tornado.web.RequestHandler):
         self.mode = camera.getMode()
 
     def get(self):
-        tpl = env.get_template('index.html')
+        tpl = env.get_template('static/index.html')
         html = tpl.render({'host':SET.HOST, 'port': SET.PORT, 'effects':self.effects,
                            'checked':self.effects.index(self.mode), "LED": "OFF" if camera.ledState else "ON"})
         self.write(html.encode('utf-8'))
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     app = tornado.web.Application([
                 (r"/", HttpHandler, dict(camera=camera)),
                 (r"/download", downloadHandler),
-                (r"/js/(.*)", tornado.web.StaticFileHandler, {"path": "./js/"}),
+                (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "./static/"}),
                 (r"/camera", WSHandler, dict(camera=camera)),
                 ])
     #global HOST
