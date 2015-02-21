@@ -188,36 +188,6 @@ def loop(camera):
     except Exception as e:
         print("in loop", e)
 
-def progressbar(NUM, LENGTH):
-    out = "["
-    sharpNum = int(math.floor(float(NUM)/LENGTH) * 60)
-    out += "#"*sharpNum + "]"
-    sys.stdout.write("\r%s" % out)
-    sys.stdout.flush()
-
-def mainLoop(camera, FPS, LENGTH):
-    writer = makevideo.MakeVideo(DIRNAME, FPS)
-    while True:
-        progressbar(camera.num, LENGTH) # this doesn't work well
-        camera.takeImage()
-        time.sleep(1.0/FPS)
-        if camera.num > LENGTH:
-            camera.terminate()
-            if raw_input("Make video? [y/n]").lower() == "y":
-                writer.ffmpeg()
-            break
-
-#TODO ws server hostname should be change according to user's RPi.
-def changejsfile(fname):
-    jsfile = ""
-    with open(fname, "rw") as fr:
-        for line in fr.readlines():
-            if "HOSTNAME" in line:
-                import socket
-                line = line[:line.index("HOSTNAME")]+socket.gethostbyname(socket.gethostname())+line[line.index("HOSTNAME")+len("HOSTNAME"):]
-            jsfile += line
-        print(jsfile)
-        fr.write(jsfile)
 
 if __name__ == "__main__":
     if cameraset.PiCamera != object:
