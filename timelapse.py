@@ -25,7 +25,7 @@ class HttpHandler(tornado.web.RequestHandler):
         self.mode = camera.getMode()
 
     def get(self):
-        tpl = env.get_template('static/index.html')
+        tpl = env.get_template("static/index.html")
         html = tpl.render({'host':SET.HOST, 'port': SET.PORT, 'effects':self.effects,
                            'checked':self.effects.index(self.mode), "LED": "OFF" if camera.ledState else "ON"})
         self.write(html.encode('utf-8'))
