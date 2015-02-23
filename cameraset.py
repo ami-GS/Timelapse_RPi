@@ -132,11 +132,6 @@ class piCamera(Camera, PiCamera):
         self.stream = io.BytesIO()
         time.sleep(2) #initialize
 
-    def takeImage(self):
-        data = np.fromstring(self.latestImg, dtype=np.uint8)
-        image = cv2.imdecode(data, 1)
-        cv2.imwrite("./%s/%s.jpg" % (self.DIRNAME, self.timeStamp()), image)
-
     def takePic(self):
         #self.leds.on()
         self.stream.seek(0)

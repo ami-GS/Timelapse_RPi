@@ -3,6 +3,7 @@ import platform
 import subprocess
 import cv2
 import settings as SET
+import numpy as np
 
 FOURCC = cv2.cv.CV_FOURCC("m","p","4","v")
 
@@ -32,6 +33,11 @@ class MakeVideo():
 
     def write(self, frame):
         self.writer.write(frame)
+
+    def RPiWrite(self, frame, stamp):
+        data = np.fromstring(frame, dtype=np.uint8)
+        image = cv2.imdecode(data, 1)
+        cv2.imwrite("./%s/%s.jpg" % (self.DIRNAME, stamp), image)
 
     def release(self):
         self.writer.release()

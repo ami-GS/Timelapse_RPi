@@ -90,7 +90,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
                 self.callback = PeriodicCallback(self.videoWriter, 1000/FPS)
                 self.writer.initWriter((SET.WIDTH, SET.HEIGHT))
             elif isinstance(self.camera, cameraset.piCamera):
-                self.callback = PeriodicCallback(self.takeConsecutiveImages, 1000/FPS)
+                self.callback = PeriodicCallback(self.RPiVideoWriter, 1000/FPS)
             self.callback.start()
             sys.stdout.write("Start recording\n")
 
@@ -118,9 +118,10 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         else:
             self.camera.setMode(message[0])
 
-    def takeConsecutiveImages(self):
-        self.camera.takeImage()
+    def RPiVideoWriter(self):
+        #self.camera.takeImage()
         self.camera.num += 1
+        self.writer.RPiWrite(self.camera.lastImg, self.camera.timeStamp())
         if self.camera.num > LENGTH:
             self.finishRecording()
             sys.stdout.write("make video? (this is not recommended) [Y/n]")
