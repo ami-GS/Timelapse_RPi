@@ -165,7 +165,6 @@ def rloop(camera):
     try:
         for foo in camera.capture_continuous(camera.stream, "jpeg", use_video_port=True):
             time.sleep(camera.sleep)
-            camera.config()
             camera.takePic()
             if clients and clients[0].ws_connection:
                 clients[0].write_message(camera.getFrame(), binary=True)

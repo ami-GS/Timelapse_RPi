@@ -1,7 +1,7 @@
 import time
 import cv2
 import numpy as np
-from threading import Thread, Event
+from threading import Thread
 import platform
 from imageprocess import ImageProcess
 import io
@@ -24,9 +24,7 @@ class Camera(object):
         self.camera = None
         self.t = None
         self.sleep = 0
-        self.event = Event()
         self.pro = ImageProcess()
-        self.config = self._configPass
         self.latestImg = None
         self.MODE = "normal"
         self.camType = ""
@@ -54,13 +52,6 @@ class Camera(object):
     def timeStamp(self):
         stamp = str(self.num).zfill(SET.ZFILL)
         return stamp
-
-    def _configPass(self):
-        pass
-
-    def _configWait(self):
-        self.event.wait(0.5)
-        self.config = self._configPass
 
     def terminate(self):
         del self.camera
@@ -139,7 +130,6 @@ class piCamera(Camera, PiCamera):
         self.led = camLED
         self.camType = "RPi"
         self.stream = io.BytesIO()
-        self.stream2 = io.BytesIO()
         time.sleep(2) #initialize
 
     def takeImage(self):
@@ -162,15 +152,4 @@ class piCamera(Camera, PiCamera):
         if mode == "normal":
             mode = "none"
         self.image_effect = mode
-        self.config = self._configWait
         self.sleep = 0
-
-    def getVideoFrame(self):
-        self.capture(self.stream2, format="jpeg") #this have error
-        self.stream2.seek(0)
-        data = np.fromstring(self.stream2.getvalue(), dtype=np.uint8)
-        self.stream2.seek(0)
-        self.stream2.truncate()
-        img = cv2.imdecode(data, 1)
-        img = img[:, :, ::-1]
-        return img
