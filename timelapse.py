@@ -121,7 +121,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
     def RPiVideoWriter(self):
         #self.camera.takeImage()
         self.camera.num += 1
-        self.writer.RPiWrite(self.camera.lastImg, self.camera.timeStamp())
+        self.writer.RPiWrite(self.camera.getFrame(), self.camera.timeStamp())
         if self.camera.num > LENGTH:
             self.finishRecording()
             sys.stdout.write("make video? (this is not recommended) [Y/n]")
